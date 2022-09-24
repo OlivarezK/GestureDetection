@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             firstPass = true;
             String output = txtOutput.getText().toString();
             output = output + " m:" + match + " d: " + info.getDistance() + " - t:" + seconds + " \n ";
-            txtOutput.setText(Arrays.toString(new TimeSeries[]{timeSeries}));
+            txtOutput.setText(output);
 
             timeSeries.clear();
             secondTimeSeries.clear();
