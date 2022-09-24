@@ -45,10 +45,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private long startTimestamp;
     private double firstPassTimeInterval;
 
-    CustomizedGestureData custom = new CustomizedGestureData();
-    private int idx1 = 0;
-    private int idx2 = 0;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,42 +122,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        /*
-            float xValue = sensorEvent.values[0];
-            float yValue = sensorEvent.values[1];
-            float zValue = sensorEvent.values[2];
+        float xValue = sensorEvent.values[0];
+        float yValue = sensorEvent.values[1];
+        float zValue = sensorEvent.values[2];
 
-            double[] values = {xValue, yValue, zValue};
-
-             */
-
-        double[][] val1 = custom.getCustTimeSeries();
-        double[][] val2 = custom.getCustSecondTimeSeries();
+        double[] values = {xValue, yValue, zValue};
 
         long time = sensorEvent.timestamp - startTimestamp;
 
         if (firstPass) {
-            if(idx1 < val1.length){
-                timeSeries.addLast(time, new TimeSeriesPoint(val1[idx1]));
-                idx1 += 1;
-            }
+            timeSeries.addLast(time, new TimeSeriesPoint(values));
         } else {
-            if(idx2 < val2.length){
-                secondTimeSeries.addLast(time, new TimeSeriesPoint(val2[idx2]));
-                idx2 += 1;
-            }
+            secondTimeSeries.addLast(time, new TimeSeriesPoint(values));
         }
 
-            /*
-            if (firstPass) {
-                timeSeries.addLast(time, new TimeSeriesPoint(values));
-            } else {
-                secondTimeSeries.addLast(time, new TimeSeriesPoint(values));
-            }
+        Log.d("MainActivity", xValue + " " + yValue + " " + zValue);
 
-            Log.d("MainActivity", xValue + " " + yValue + " " + zValue);
-
-             */
     }
 
     @Override

@@ -22,10 +22,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private SensorManager sensorManager;
     private Sensor sensor;
-    private EditText txt_xAxis;
+    private EditText txt_Output;
     private Button btnStart, btnStop;
 
-    private double[][] gesture_matrix = new double[100][];
+    private double[][] gesture_matrix = new double[300][];
     private int matrix_idx = 0;
 
     private SensorEventListener mSensorListener = new SensorEventListener() {
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         public void onSensorChanged(SensorEvent sensorEvent) {
             double[] values = {sensorEvent.values[0],sensorEvent.values[1],sensorEvent.values[2]};
 
-            if (matrix_idx < 100){
+            if (matrix_idx < 300){
                 gesture_matrix[matrix_idx] = values;
                 matrix_idx += 1;
             }
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txt_xAxis = (EditText) findViewById(R.id.txt_Output);
+        txt_Output = (EditText) findViewById(R.id.txt_Output);
         btnStart = (Button) findViewById(R.id.btn_start);
         btnStop = (Button) findViewById(R.id.btn_stop);
 
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         btnStart.setEnabled(true);
         btnStop.setEnabled(false);
 
-        txt_xAxis.setText(Arrays.deepToString(gesture_matrix));
+        txt_Output.setText(Arrays.deepToString(gesture_matrix));
 
         Log.d(TAG, "Gesture Matrix Data: " + Arrays.deepToString(gesture_matrix));
         Log.d(TAG, "index: " + matrix_idx);
