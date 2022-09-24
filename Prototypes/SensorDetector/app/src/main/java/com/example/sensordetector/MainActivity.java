@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import java.util.Arrays;
 import java.util.Date;
@@ -21,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private SensorManager sensorManager;
     private Sensor sensor;
-    private TextView txt_xAxis;
+    private EditText txt_xAxis;
     private Button btnStart, btnStop;
 
     private double[][] gesture_matrix = new double[100][];
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txt_xAxis = (TextView) findViewById(R.id.xAxis);
+        txt_xAxis = (EditText) findViewById(R.id.txt_Output);
         btnStart = (Button) findViewById(R.id.btn_start);
         btnStop = (Button) findViewById(R.id.btn_stop);
 
@@ -87,7 +88,9 @@ public class MainActivity extends AppCompatActivity {
         btnStop.setEnabled(false);
 
         txt_xAxis.setText(Arrays.deepToString(gesture_matrix));
+
         Log.d(TAG, "Gesture Matrix Data: " + Arrays.deepToString(gesture_matrix));
+        Log.d(TAG, "index: " + matrix_idx);
     }
 
 }
