@@ -25,6 +25,21 @@ class MainActivity : Activity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        /*
+        val model = Model.newInstance(this)
+
+        // Creates inputs for reference.
+        val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1), DataType.FLOAT32)
+
+        // Runs model inference and gets result.
+        val outputs = model.process(inputFeature0)
+        val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+
+        // Releases model resources if no longer used.
+        model.close()
+
+         */
+
         val modelfile = File("/ml/model.tflite")
 
         initializeTask.addOnSuccessListener {
@@ -32,6 +47,6 @@ class MainActivity : Activity() {
             interpreter = InterpreterApi.create(modelfile, interpreterOption)
         }.addOnFailureListener { e -> Log.e("Interpreter", "Cannot initialize interpreter", e) }
 
-        //interpreter.run()
+        //interpreter.run(inputFeature0, outputFeature0)
     }
 }
