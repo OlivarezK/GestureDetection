@@ -23,6 +23,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        mlModelBinding true
     }
 }
 
@@ -38,4 +39,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-tflite-java:16.0.0'
     // Optional: include Tensorflow Lite Support Library
     implementation 'com.google.android.gms:play-services-tflite-support:16.0.0'
+    implementation 'org.tensorflow:tensorflow-lite-support:0.1.0'
 }
