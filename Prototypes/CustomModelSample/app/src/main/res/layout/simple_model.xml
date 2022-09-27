@@ -18,13 +18,19 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             >
-            <TextView
-                android:id="@+id/accelerometerText"
-                android:layout_width="wrap_content"
+            <EditText
+                android:id="@+id/input"
+                android:inputType="numberDecimal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <Button
+                android:id="@+id/submit"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/hello_world" />
+                android:text="Submit"
+                />
             <TextView
-                android:id="@+id/gyroscopeText"
+                android:id="@+id/text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/hello_world" />
