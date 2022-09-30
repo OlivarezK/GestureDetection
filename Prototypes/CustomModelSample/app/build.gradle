@@ -43,6 +43,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-base:18.1.0'
 
     implementation 'org.tensorflow:tensorflow-lite:+'
+    //implementation 'org.tensorflow:tensorflow-lite-support:0.1.0'
 
 
 }
