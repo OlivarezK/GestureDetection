@@ -35,16 +35,16 @@ class MainActivity : Activity() {
             if(isChecking){
                 currentAccelerometerCount += 1;
             }
-        }), accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }), accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
 
         val gyroscope: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
         sensorManager.registerListener(GyroscopeListener(fun(x: Float,y:Float,z:Float){
             if(isChecking){
                 currentGyroscopeCount += 1;
             }
-        }), gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        }), gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
 
-        val timer = object: CountDownTimer(10 * 1000, 1 + 1000) {
+        val timer = object: CountDownTimer(5 * 1000, 1 + 1000) {
             override fun onTick(millisUntilFinished: Long) {
 
             }
