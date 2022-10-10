@@ -24,6 +24,7 @@ class MainActivity : Activity() {
     //private lateinit var interpreter: InterpreterApi
     private lateinit var byteBuffer: ByteBuffer;
     private val input = FloatArray(127*3)
+    private var idx = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,10 +45,11 @@ class MainActivity : Activity() {
 
         binding.btnStart.setOnClickListener{
             sensorManager.registerListener(AccelerometerListener(fun(x: Float,y:Float,z:Float){
-                for (i in 0..380 step 3){
-                    input[i] = x
-                    input[i+1] = y
-                    input[i+2] = z
+                if(idx < 380){
+                    input[idx] = x
+                    input[idx+1] = y
+                    input[idx+2] = z
+                    idx += 3
                 }
                 //binding.accelerometerText.text = "Accelerometer Readings $x $y $x"
             }), accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
@@ -57,6 +59,7 @@ class MainActivity : Activity() {
             sensorManager.unregisterListener(AccelerometerListener(fun(x: Float,y:Float,z:Float){}))
 
             val prediction = Predict(input)
+            idx = 0
 
             if(prediction[0] > prediction[1]){
                 binding.txtPrediction.text = "Prediction: Right"
