@@ -6,6 +6,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.MediaPlayer
 import android.os.Bundle
 import com.example.custommodelsample.databinding.ActivityMainBinding
 import java.nio.ByteBuffer
@@ -22,7 +23,9 @@ class MainActivity : Activity() {
 
     private lateinit var binding: ActivityMainBinding
     //private lateinit var interpreter: InterpreterApi
-    private lateinit var byteBuffer: ByteBuffer;
+    private lateinit var byteBuffer: ByteBuffer
+    private lateinit var mediaplayer: MediaPlayer
+
     private val input = FloatArray(127*3)
     private var idx = 0
 
@@ -42,7 +45,6 @@ class MainActivity : Activity() {
         }), gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
          */
 
-
         binding.btnStart.setOnClickListener{
             sensorManager.registerListener(AccelerometerListener(fun(x: Float,y:Float,z:Float){
                 if(idx < 380){
@@ -51,7 +53,6 @@ class MainActivity : Activity() {
                     input[idx+2] = z
                     idx += 3
                 }
-                //binding.accelerometerText.text = "Accelerometer Readings $x $y $x"
             }), accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
 
@@ -59,15 +60,20 @@ class MainActivity : Activity() {
             sensorManager.unregisterListener(AccelerometerListener(fun(x: Float,y:Float,z:Float){}))
 
             val prediction = Predict(input)
-            idx = 0
 
             if(prediction[0] > prediction[1]){
+                mediaplayer = MediaPlayer.create(this, R.raw.assistance)
+                mediaplayer.start()
                 binding.txtPrediction.text = "Prediction: Right"
             }else if(prediction[0] < prediction[1]){
+                mediaplayer = MediaPlayer.create(this, R.raw.restroom)
+                mediaplayer.start()
                 binding.txtPrediction.text = "Prediction: Left"
             }else{
                 binding.txtPrediction.text = "Prediction: Neither"
             }
+
+            idx = 0
         }
     }
 
@@ -93,6 +99,14 @@ class MainActivity : Activity() {
         override fun onSensorChanged(event: SensorEvent) {
 
         }
+    }
+
+    override fun onDestroy() {
+        if(this::mediaplayer.isInitialized){
+            mediaplayer.stop()
+            mediaplayer.release()
+        }
+        super.onDestroy()
     }
 }
 
