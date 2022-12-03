@@ -36,7 +36,12 @@ public class MainActivity extends Activity {
     private TextView mTextView;
     private ActivityMainBinding binding;
 
+    // UI
     private Button btnStart, btnStop;
+
+    // for API
+    private final OkHttpClient client = new OkHttpClient();
+    private int fileNum = 1;
 
     // for gesture detection
     private String a_data = "", g_data = "";
@@ -76,12 +81,6 @@ public class MainActivity extends Activity {
         }
     };
 
-    // for bluetooth connectivity
-    // TODO: Implement bluetooth
-
-    // for API
-    private final OkHttpClient client = new OkHttpClient();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,28 +105,6 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
                 stopRecording();
-            }
-        });
-
-        // API
-        RequestBody formBody = new FormBody.Builder().add("value", "sample post string.").build();
-        Request request = new Request.Builder()
-                .url("http:/192.168.100.7:5000/post")
-                .post(formBody)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()){
-                    ResponseBody responseBody = response.body();
-                    Log.d(TAG, "onResponse: " + responseBody.string());
-                }
             }
         });
     }
@@ -166,8 +143,14 @@ public class MainActivity extends Activity {
 
         // merge a_data and g_data
         String mergedData = mergeData(a_data, g_data);
-
         Log.i("merged data", mergedData);
+
+        // post data to API
+        if (mergedData != ""){
+            postData(mergedData);
+        }else {
+            Log.i("Error", "merged data is empty.");
+        }
 
         // clear a_data and g_data
         a_data = "";
@@ -181,6 +164,9 @@ public class MainActivity extends Activity {
         String[] split_a = a_data.split(",");
         String[] split_g = g_data.split(",");
 
+        Log.i("accelerometer data", String.valueOf(split_a.length));
+        Log.i("gyroscope data", String.valueOf(split_g.length));
+
         // check if accelerometer and gyro data have same no. of data
         // if not, get smaller size
         if (split_a.length != split_g.length){
@@ -189,6 +175,8 @@ public class MainActivity extends Activity {
             }else{
                 dataLen = split_g.length;
             }
+        }else{
+            dataLen = split_a.length;
         }
 
         int ctr = 0;
@@ -216,5 +204,34 @@ public class MainActivity extends Activity {
         }
 
         return merged_data;
+    }
+
+    private void postData(String data){
+        // API
+        RequestBody formBody = new FormBody.Builder()
+                .add("value", data)
+                .add("fileNum", String.valueOf(fileNum))
+                .build();
+        Request request = new Request.Builder()
+                .url("http:/192.168.100.7:5000/post")
+                .post(formBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()){
+                    ResponseBody responseBody = response.body();
+                    Log.d(TAG, "onResponse: " + responseBody.string());
+
+                    fileNum += 1;
+                }
+            }
+        });
     }
 }
