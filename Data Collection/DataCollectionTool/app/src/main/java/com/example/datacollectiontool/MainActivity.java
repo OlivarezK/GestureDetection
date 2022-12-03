@@ -1,6 +1,9 @@
 package com.example.datacollectiontool;
 
+import static android.content.ContentValues.TAG;
+
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -12,7 +15,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.example.datacollectiontool.databinding.ActivityMainBinding;
+
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttp;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class MainActivity extends Activity {
 
@@ -62,6 +79,9 @@ public class MainActivity extends Activity {
     // for bluetooth connectivity
     // TODO: Implement bluetooth
 
+    // for API
+    private final OkHttpClient client = new OkHttpClient();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +106,28 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
                 stopRecording();
+            }
+        });
+
+        // API
+        RequestBody formBody = new FormBody.Builder().add("value", "sample post string.").build();
+        Request request = new Request.Builder()
+                .url("http:/192.168.100.7:5000/post")
+                .post(formBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()){
+                    ResponseBody responseBody = response.body();
+                    Log.d(TAG, "onResponse: " + responseBody.string());
+                }
             }
         });
     }
