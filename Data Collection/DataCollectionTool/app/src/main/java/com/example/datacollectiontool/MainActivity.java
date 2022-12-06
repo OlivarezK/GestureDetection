@@ -20,6 +20,8 @@ import androidx.annotation.NonNull;
 import com.example.datacollectiontool.databinding.ActivityMainBinding;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.Date;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -44,42 +46,7 @@ public class MainActivity extends Activity {
     private int fileNum = 1;
 
     // for gesture detection
-    private String a_data = "", g_data = "";
-    private float a_x, a_y, a_z, g_x, g_y, g_z;
-
-    private SensorManager sensorManager;
-    private Sensor accelerometer, gyroscope;
-
-    private SensorEventListener accelerometerListener = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent sensorEvent) {
-            a_x = sensorEvent.values[0];
-            a_y = sensorEvent.values[1];
-            a_z = sensorEvent.values[2];
-
-            a_data += String.valueOf(a_x) + "," + String.valueOf(a_y) + "," + String.valueOf(a_z) + ",";
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int i) {
-
-        }
-    };
-    private SensorEventListener gyroscopeListener = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent sensorEvent) {
-            g_x = sensorEvent.values[0];
-            g_y = sensorEvent.values[1];
-            g_z = sensorEvent.values[2];
-
-            g_data += String.valueOf(g_x) + "," + String.valueOf(g_y) + "," + String.valueOf(g_z) + ",";
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int i) {
-
-        }
-    };
+    private GestureDetection gesture = new GestureDetection();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +56,9 @@ public class MainActivity extends Activity {
         setContentView(binding.getRoot());
 
         // initialize components
-        initializeComponents();
+        btnStart = findViewById(R.id.btnStart);
+        btnStop = findViewById(R.id.btnStop);
+        gesture.initializeGestureComponents(this);
 
         // start button onclick
         btnStop.setEnabled(false);
@@ -109,25 +78,12 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void initializeComponents(){
-        btnStart = findViewById(R.id.btnStart);
-        btnStop = findViewById(R.id.btnStop);
-
-        // sensor components
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-    }
-
     private void startRecording(){
         btnStart.setEnabled(false);
         btnStop.setEnabled(true);
 
         // record accelerometer data
-        sensorManager.registerListener(accelerometerListener, accelerometer, sensorManager.SENSOR_DELAY_NORMAL);
-
-        // record gyroscope data
-        sensorManager.registerListener(gyroscopeListener, gyroscope, sensorManager.SENSOR_DELAY_NORMAL);
+        gesture.recordGesture();
     }
 
     private void stopRecording(){
@@ -135,75 +91,16 @@ public class MainActivity extends Activity {
         btnStop.setEnabled(false);
 
         // stop recording
-        sensorManager.unregisterListener(accelerometerListener);
-        sensorManager.unregisterListener(gyroscopeListener);
+        gesture.unregisterListeners();
 
-        Log.i("accelerometer data", a_data);
-        Log.i("gyroscope data", g_data);
-
-        // merge a_data and g_data
-        String mergedData = mergeData(a_data, g_data);
+        // merge time_data, a_data and g_data
+        String mergedData = gesture.mergeToCsv();
         Log.i("merged data", mergedData);
 
         // post data to API
-        if (mergedData != ""){
-            postData(mergedData);
-        }else {
-            Log.i("Error", "merged data is empty.");
-        }
+        postData(mergedData);
 
-        // clear a_data and g_data
-        a_data = "";
-        g_data = "";
-    }
-
-    private String mergeData(String a_data, String g_data){
-        String merged_data = "";
-        int dataLen = 0;
-
-        String[] split_a = a_data.split(",");
-        String[] split_g = g_data.split(",");
-
-        Log.i("accelerometer data", String.valueOf(split_a.length));
-        Log.i("gyroscope data", String.valueOf(split_g.length));
-
-        // check if accelerometer and gyro data have same no. of data
-        // if not, get smaller size
-        if (split_a.length != split_g.length){
-            if (split_a.length < split_g.length){
-                dataLen = split_a.length;
-            }else{
-                dataLen = split_g.length;
-            }
-        }else{
-            dataLen = split_a.length;
-        }
-
-        int ctr = 0;
-        int start = 0;
-        int end = 2;
-
-        for (int i = 0; i < dataLen; i++){
-            ctr ++;
-            merged_data += split_a[i] + ",";
-
-            if (ctr == 3){ // concatenate 3 g_data every 3rd a_data
-                ctr = 0;
-
-                for (int j = start; j <= end; j++){
-                    if (j == end){
-                        merged_data += split_g[j] + "\n";
-                    }else{
-                        merged_data += split_g[j] + ",";
-                    }
-                }
-
-                start += 3;
-                end += 3;
-            }
-        }
-
-        return merged_data;
+        gesture.clearData();
     }
 
     private void postData(String data){
