@@ -50,11 +50,12 @@ public class GestureDetection{
         }
     };
 
-    // must be called in onCreate function and pass 'this' as argument
-    public void initializeGestureComponents(Context mContext){
+    // initializes necessary components
+    // pass onCreate function's Context as argument
+    public void initializeGestureComponents(Context onCreateContext){
 
-        a_Manager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
-        g_Manager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
+        a_Manager = (SensorManager) onCreateContext.getSystemService(Context.SENSOR_SERVICE);
+        g_Manager = (SensorManager) onCreateContext.getSystemService(Context.SENSOR_SERVICE);
         a_Sensor = a_Manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         g_Sensor = g_Manager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
     }
@@ -79,17 +80,19 @@ public class GestureDetection{
         g_Manager.unregisterListener(g_Listener);
     }
 
-    // records time data in milliseconds
-    public void getTimeData(){
-        currMilli = System.currentTimeMillis();
-        time_data += String.valueOf(currMilli-startMilli) + ",";
-    }
-
     // clear time, accelerometer, and gyroscope data
+    // don't forget to clear data after a recording session
+    // if data will be merged after recording, clearing must be done after merging
     public void clearData(){
         a_data = "";
         g_data = "";
         time_data = "";
+    }
+
+    // records time data in milliseconds
+    public void getTimeData(){
+        currMilli = System.currentTimeMillis();
+        time_data += String.valueOf(currMilli-startMilli) + ",";
     }
 
     // merges accelerometer and gyroscope data
@@ -136,18 +139,22 @@ public class GestureDetection{
 
         for (int i = 0; i < dataLen(); i++){
 
+            // add time data at the beginning of each line
             if (ctr == 0){
                 merged_data += split_time[i/3] + ",";
             }
+
+            // add a_data
             merged_data += split_a[i] + ",";
             ctr ++;
 
-            if (ctr == 3){ // concatenate 3 g_data every 3rd a_data
+            // concatenate 3 g_data every 3rd a_data
+            if (ctr == 3){
                 ctr = 0;
 
                 for (int j = start; j <= end; j++){
                     if (j == end){
-                        merged_data += split_g[j] + "\n";
+                        merged_data += split_g[j] + "\n"; // newline without ',' every third g_data
                     }else{
                         merged_data += split_g[j] + ",";
                     }
@@ -167,14 +174,13 @@ public class GestureDetection{
 
         // check if accelerometer and gyro data have same no. of data
         // if not, get smaller size
-        if (a_data.split(",").length != g_data.split(",").length){
-            if (a_data.split(",").length < g_data.split(",").length){
-                data_len = a_data.split(",").length;
-            }else{
-                data_len = g_data.split(",").length;
-            }
-        }else{
+        if (a_data.split(",").length == g_data.split(",").length ||
+                a_data.split(",").length < g_data.split(",").length){
+
             data_len = a_data.split(",").length;
+        }else{
+
+            data_len = g_data.split(",").length;
         }
 
         return data_len;

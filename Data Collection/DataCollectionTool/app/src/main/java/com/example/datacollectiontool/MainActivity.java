@@ -56,9 +56,7 @@ public class MainActivity extends Activity {
         setContentView(binding.getRoot());
 
         // initialize components
-        btnStart = findViewById(R.id.btnStart);
-        btnStop = findViewById(R.id.btnStop);
-        gesture.initializeGestureComponents(this);
+        initializeComponents(this);
 
         // start button onclick
         btnStop.setEnabled(false);
@@ -76,6 +74,14 @@ public class MainActivity extends Activity {
                 stopRecording();
             }
         });
+    }
+
+    private void initializeComponents(Context onCreateContext){
+
+        // initialize components
+        btnStart = findViewById(R.id.btnStart);
+        btnStop = findViewById(R.id.btnStop);
+        gesture.initializeGestureComponents(onCreateContext);
     }
 
     private void startRecording(){
