@@ -22,8 +22,10 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
-import com.example.speakbyhand.R
-import com.example.speakbyhand.presentation.theme.SpeakByHandTheme
+/*import com.example.speakbyhand.R
+import com.example.speakbyhand.presentation.theme.SpeakByHandTheme*/
+import com.speakbyhand.app.R
+import com.speakbyhand.app.presentation.theme.SpeakByHandTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
