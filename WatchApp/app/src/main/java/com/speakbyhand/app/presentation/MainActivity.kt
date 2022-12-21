@@ -6,64 +6,226 @@
 
 package com.speakbyhand.app.presentation
 
+import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
-import com.example.speakbyhand.R
-import com.example.speakbyhand.presentation.theme.SpeakByHandTheme
+import com.speakbyhand.app.R
+import com.speakbyhand.app.core.DelimiterDetector
+import com.speakbyhand.app.presentation.theme.SpeakByHandTheme
+import java.util.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.*
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
+import kotlin.math.roundToInt
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+class MainActivity : ComponentActivity(), DelimiterDetector.Listener {
+
+    private var delimiterDetector: DelimiterDetector? = null
+    private var sensorManager: SensorManager? = null
+    private var vibrator: Vibrator? = null
+    private var countDownTimer: CountDownTimer? = null
+    private var performedGesture = false
+    private var trigger = false
+    private var textToSpeech: TextToSpeech? = null
+
+        override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
-            WearApp("Android")
+            WearApp {ShowText(stringResource(R.string.shake),fontSize=30.sp)}
+        }
+
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        delimiterDetector = DelimiterDetector(this)
+        delimiterDetector!!.start(sensorManager)
+        vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        textToSpeech = TextToSpeech(applicationContext) { status ->
+            if (status != TextToSpeech.ERROR) textToSpeech!!.language = Locale.US
+        }
+
+    }
+
+    override fun hearShake() {
+        vibrator!!.vibrate(VibrationEffect.createOneShot(500, 10))
+        delimiterDetector!!.stop()
+        trigger = true
+        countDownTimer = object : CountDownTimer(2000, 50) { //
+            override fun onTick(millisUntilFinished: Long) {
+                if (trigger) {
+                    checkPerformedGesture()
+                    setContent {WearApp {ShowTimer()}}
+                }
+                trigger=false
+            }
+            override fun onFinish() {
+                finishedPerformedGesture()
+            }
+        }
+        (countDownTimer as CountDownTimer).start()
+    }
+
+    private fun checkPerformedGesture() {
+        performedGesture = true
+        //performedGesture = false
+    }
+
+    private fun finishedPerformedGesture() {
+        if (countDownTimer != null) countDownTimer!!.cancel()
+
+        if (performedGesture) {
+            textToSpeech!!.speak("SPEAK SPEAK SPEAK", TextToSpeech.QUEUE_FLUSH, null, null)
+            setContent {
+                WearApp {ShowImage()}
+            }
+        } else {
+            setContent {
+                WearApp {
+                    ShowText(stringResource(R.string.unknown),fontSize=25.sp)
+                    ShowText(stringResource(R.string.question_mark),fontSize=40.sp)
+                }
+            }
+            val mVibratePattern = longArrayOf(0, 500, 500, 500)
+            val effect = VibrationEffect.createWaveform(mVibratePattern, -1)
+            vibrator!!.vibrate(effect)
+        }
+
+        countDownTimer = object : CountDownTimer(3000, 500) {
+            override fun onTick(millisUntilFinished: Long) {}
+            override fun onFinish() {
+                delimiterDetector!!.start(sensorManager)
+                setContent {
+                    WearApp {ShowText(stringResource(R.string.shake),fontSize=30.sp)}
+                }
+            }
+        }
+        (countDownTimer as CountDownTimer).start()
+    }
+}
+
+@Composable
+fun ShowTimer() {
+    Timer(
+        totalTime = 2L * 1000L,
+        inactiveBarColor = Color.DarkGray,
+        activeBarColor = MaterialTheme.colors.primary,
+        modifier = Modifier.size(200.dp)
+    )
+}
+
+@Composable
+fun Timer(totalTime: Long, inactiveBarColor: Color, activeBarColor: Color, modifier: Modifier = Modifier,
+    initialValue: Float = 1f, strokeWidth: Dp = 20.dp) {
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    var value by remember { mutableStateOf(initialValue) }
+    var currentTime by remember { mutableStateOf(totalTime) }
+    LaunchedEffect(key1 = currentTime) {
+        if(currentTime > 0) {
+            currentTime -= 50L
+            value = currentTime / totalTime.toFloat()
+        }
+    }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .onSizeChanged {
+                size = it
+            }
+    ) {
+        Canvas(modifier = modifier) {
+            drawArc(
+                color = inactiveBarColor,
+                startAngle = -215f,
+                sweepAngle = 250f,
+                useCenter = false,
+                size = Size(size.width.toFloat(), size.height.toFloat()),
+                style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
+            )
+            drawArc(
+                color = activeBarColor,
+                startAngle = -215f,
+                sweepAngle = 250f * value,
+                useCenter = false,
+                size = Size(size.width.toFloat(), size.height.toFloat()),
+                style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
+            )
+        }
+        Column(){
+            val countdown =  currentTime.toDouble() / 1000
+            ShowText(stringResource(R.string.perform), fontSize = 20.sp)
+            ShowText(text = String.format("%.1f", (countdown * 2).roundToInt() / 2.0), fontSize = 40.sp)
         }
     }
 }
 
 @Composable
-fun WearApp(greetingName: String) {
+fun ShowText(text:String, fontSize: TextUnit) {
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colors.primary,
+        text = text,
+        fontSize = fontSize
+    )
+}
+
+@Composable
+fun ShowImage() {
+    Image(
+        painterResource(R.drawable.speaker),
+        contentDescription = null,
+        modifier = Modifier
+            .fillMaxWidth()
+            .requiredSize(100.dp),
+        alignment = Alignment.Center
+    )
+}
+
+@Composable
+fun WearApp(content: @Composable () -> Unit) {
     SpeakByHandTheme {
-        /* If you have enough items in your list, use [ScalingLazyColumn] which is an optimized
-         * version of LazyColumn for wear devices with some added features. For more information,
-         * see d.android.com/wear/compose.
-         */
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colors.background),
             verticalArrangement = Arrangement.Center
         ) {
-            Greeting(greetingName = greetingName)
+            content ()
         }
     }
-}
-
-@Composable
-fun Greeting(greetingName: String) {
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colors.primary,
-        text = stringResource(R.string.hello_world, greetingName)
-    )
 }
 
 @Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
-    WearApp("Preview Android")
+    WearApp {ShowText(stringResource(R.string.app_name),fontSize=30.sp)}
 }

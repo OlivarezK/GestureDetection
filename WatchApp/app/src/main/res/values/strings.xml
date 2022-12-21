@@ -5,4 +5,9 @@
     values-round/strings.xml for round devices.
     -->
     <string name="hello_world">From the Square world,\nHello, %1$s!</string>
+
+    <string name="shake">SHAKE TO START</string>
+    <string name="perform">PERFORMING GESTURE</string>
+    <string name="unknown">UNKNOWN GESTURE</string>
+    <string name="question_mark">"?"</string>
 </resources>
