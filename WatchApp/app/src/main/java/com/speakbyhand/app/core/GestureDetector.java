@@ -1,7 +1,7 @@
 package com.speakbyhand.app.core;
 
-class GestureDetector {
+public class GestureDetector {
     public GestureCode detect(GestureData data){
-        throw new kotlin.NotImplementedError();
+        return GestureCode.Sample;
     }
 }
