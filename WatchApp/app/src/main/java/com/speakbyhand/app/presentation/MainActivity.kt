@@ -58,10 +58,12 @@ class MainActivity : ComponentActivity() {
         val textToSpeech = TextToSpeech(applicationContext) {}
         val gestureDataRecorder = GestureDataRecorder()
         val gestureDetector = GestureDetector()
+        val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
 
         // UI
         setContent {
             var currentState by rememberSaveable { mutableStateOf(AppState.WaitingDelimiter) }
+            var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Sample) }
             SpeakByHandTheme {
                 Column(
                     modifier = Modifier
@@ -91,6 +93,7 @@ class MainActivity : ComponentActivity() {
                             detectGestureCode = {
                                 val gestureData = gestureDataRecorder.gestureData
                                 val detection = gestureDetector.detect(gestureData)
+                                detectedGestureCode = detection
                                 Pair(detection != null, detection)
                             },
                             onGestureDetected = {
@@ -106,6 +109,7 @@ class MainActivity : ComponentActivity() {
                         )
                         AppState.SpeakingPhrase -> SpeakingPhrase(
                             textToSpeech = textToSpeech,
+                            phrase = gestureToPhrase.toMappedPhrase(detectedGestureCode),
                             onFinish = {
                                 currentState = AppState.WaitingDelimiter
                             }
@@ -189,9 +193,9 @@ fun PerformingGesture(
 }
 
 @Composable
-fun SpeakingPhrase(textToSpeech: TextToSpeech, onFinish: () -> Unit) {
+fun SpeakingPhrase(textToSpeech: TextToSpeech, phrase: String, onFinish: () -> Unit) {
     // Logic
-    textToSpeech.speak("SPEAK SPEAK SPEAK", TextToSpeech.QUEUE_FLUSH, null, null)
+    textToSpeech.speak(phrase, TextToSpeech.QUEUE_FLUSH, null, null)
     thread {
         do {
             val speakingEnd = textToSpeech.isSpeaking
