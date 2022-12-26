@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
         dataRecorder.stop()
         playSpeech()
 
-        val mergedData: String = dataRecorder.getCsvData()
+        val mergedData: String = dataRecorder.getDataAsCsvString()
         Log.i("merged data", mergedData)
 
         apiService.postData(mergedData)

@@ -82,7 +82,7 @@ public class GestureDataRecorder {
         timeDataPoints.add((float) (currMilli - startMilli));
     }
 
-    public String getCsvData() {
+    public String getDataAsCsvString() {
         StringBuilder csvContentBuilder = new StringBuilder();
         for (int i = 0; i < accDataPoints.size(); i++) {
             ImuSensorReading accSample = accDataPoints.get(i);
