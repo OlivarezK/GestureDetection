@@ -5,27 +5,27 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import java.util.ArrayList;
 
 public class GestureDataRecorder {
     private SensorManager a_Manager, g_Manager;
     private Sensor a_Sensor, g_Sensor;
 
-    private String a_data = "", g_data = "", time_data = "";
+    private ArrayList<String> a_data = new ArrayList<String>();
+    private ArrayList<String> g_data = new ArrayList<String>();
+    private ArrayList<String> time_data = new ArrayList<String>();
 
-    private float a_x, a_y, a_z, g_x, g_y, g_z;
     private long startMilli, currMilli;
 
     private final SensorEventListener a_Listener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-            a_x = sensorEvent.values[0];
-            a_y = sensorEvent.values[1];
-            a_z = sensorEvent.values[2];
+            a_data.add(String.valueOf(sensorEvent.values[0]));
+            a_data.add(String.valueOf(sensorEvent.values[1]));
+            a_data.add(String.valueOf(sensorEvent.values[2]));
 
             // does not need to be removed even when not used
             getTimeData();
-
-            a_data += String.valueOf(a_x) + "," + String.valueOf(a_y) + "," + String.valueOf(a_z) + ",";
         }
 
         @Override
@@ -37,11 +37,9 @@ public class GestureDataRecorder {
     private final SensorEventListener g_Listener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-            g_x = sensorEvent.values[0];
-            g_y = sensorEvent.values[1];
-            g_z = sensorEvent.values[2];
-
-            g_data += String.valueOf(g_x) + "," + String.valueOf(g_y) + "," + String.valueOf(g_z) + ",";
+            g_data.add(String.valueOf(sensorEvent.values[0]));
+            g_data.add(String.valueOf(sensorEvent.values[1]));
+            g_data.add(String.valueOf(sensorEvent.values[2]));
         }
 
         @Override
@@ -67,8 +65,8 @@ public class GestureDataRecorder {
         startMilli = System.currentTimeMillis();
 
         // record accelerometer and gyroscope data
-        a_Manager.registerListener(a_Listener, a_Sensor, SensorManager.SENSOR_DELAY_NORMAL);
-        g_Manager.registerListener(g_Listener, g_Sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        a_Manager.registerListener(a_Listener, a_Sensor, SensorManager.SENSOR_DELAY_FASTEST);
+        g_Manager.registerListener(g_Listener, g_Sensor, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     // stops recording gesture data
@@ -83,26 +81,21 @@ public class GestureDataRecorder {
     // don't forget to clear data after a recording session
     // if data will be merged after recording, clearing must be done after merging
     public void clearData(){
-        a_data = "";
-        g_data = "";
-        time_data = "";
+        a_data.clear();
+        g_data.clear();
+        time_data.clear();
     }
 
     // records time data in milliseconds
     public void getTimeData(){
         currMilli = System.currentTimeMillis();
-        time_data += String.valueOf(currMilli-startMilli) + ",";
+        time_data.add(String.valueOf(currMilli-startMilli) + ",");
     }
 
     // merges accelerometer and gyroscope data
     // TODO: try better approach (if possible)
     public float[] mergeData(){
-
         float[] merged_data = new float[dataLen()*2];
-
-        String[] split_a = a_data.split(",");
-        String[] split_g = g_data.split(",");
-
         int ctr = 0, a_ctr = 0, g_ctr = 0;
         for (int i = 0; i < dataLen(); i++){
 
@@ -111,10 +104,10 @@ public class GestureDataRecorder {
             }
 
             if (ctr < 3){
-                merged_data[i] = Float.parseFloat(split_a[a_ctr]);
+                merged_data[i] = Float.parseFloat(a_data.get(a_ctr));
                 a_ctr ++;
             }else{
-                merged_data[i] = Float.parseFloat(split_g[g_ctr]);
+                merged_data[i] = Float.parseFloat(g_data.get(a_ctr));
                 g_ctr ++;
             }
 
@@ -128,10 +121,6 @@ public class GestureDataRecorder {
     public String mergeToCsv(){
         String merged_data = "";
 
-        String[] split_a = a_data.split(",");
-        String[] split_g = g_data.split(",");
-        String[] split_time = time_data.split(",");
-
         // merge time, accelerometer, and gyroscope data in csv format
         int ctr = 0;
         int start = 0, end = 2;
@@ -140,11 +129,11 @@ public class GestureDataRecorder {
 
             // add time data at the beginning of each line
             if (ctr == 0){
-                merged_data += split_time[i/3] + ",";
+                merged_data += time_data.get(i/3) + ",";
             }
 
             // add a_data
-            merged_data += split_a[i] + ",";
+            merged_data += a_data.get(i) + ",";
             ctr ++;
 
             // concatenate 3 g_data every 3rd a_data
@@ -153,9 +142,9 @@ public class GestureDataRecorder {
 
                 for (int j = start; j <= end; j++){
                     if (j == end){
-                        merged_data += split_g[j] + "\n"; // newline without ',' every third g_data
+                        merged_data += g_data.get(j) + "\n"; // newline without ',' every third g_data
                     }else{
-                        merged_data += split_g[j] + ",";
+                        merged_data += g_data.get(j) + ",";
                     }
                 }
 
@@ -173,13 +162,13 @@ public class GestureDataRecorder {
 
         // check if accelerometer and gyro data have same no. of data
         // if not, get smaller size
-        if (a_data.split(",").length == g_data.split(",").length ||
-                a_data.split(",").length < g_data.split(",").length){
+        if (a_data.size() == g_data.size() ||
+                a_data.size() < g_data.size()){
 
-            data_len = a_data.split(",").length;
+            data_len = a_data.size();
         }else{
 
-            data_len = g_data.split(",").length;
+            data_len = g_data.size();
         }
 
         return data_len;
