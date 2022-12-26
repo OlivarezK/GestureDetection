@@ -23,10 +23,10 @@ class ImuSensorReading {
 public class GestureDataRecorder {
     private final SensorManager accManager, gyroManager;
     private final Sensor accSensor, gyroSensor;
-
-    private final ArrayList<ImuSensorReading> accDataPoints = new ArrayList<>();
-    private final ArrayList<ImuSensorReading> gyroDataPoints = new ArrayList<>();
-    private final ArrayList<Float> timeDataPoints = new ArrayList<>();
+    private final int AVERAGE_DATA_POINTS_COUNT = 200;
+    private final ArrayList<ImuSensorReading> accDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
+    private final ArrayList<ImuSensorReading> gyroDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
+    private final ArrayList<Float> timeDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
 
     private long startMilli;
 
@@ -45,7 +45,7 @@ public class GestureDataRecorder {
     private final SensorEventListener gyroListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-            accDataPoints.add(new ImuSensorReading(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]));
+            gyroDataPoints.add(new ImuSensorReading(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]));
         }
 
         @Override
