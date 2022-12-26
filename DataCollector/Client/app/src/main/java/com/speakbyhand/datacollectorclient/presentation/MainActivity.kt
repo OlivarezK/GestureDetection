@@ -42,8 +42,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         apiService = GestureDataApiService()
-        dataRecorder = GestureDataRecorder()
-        dataRecorder.initializeGestureComponents(this)
+        dataRecorder = GestureDataRecorder(this)
 
         super.onCreate(savedInstanceState)
         setContent {
@@ -52,18 +51,18 @@ class MainActivity : ComponentActivity() {
     }
 
     fun startRecording() {
-        dataRecorder.recordGesture()
+        dataRecorder.start()
     }
 
     fun stopRecording() {
-        dataRecorder.unregisterListeners()
+        dataRecorder.stop()
         playSpeech()
 
-        val mergedData: String = dataRecorder.mergeToCsv()
+        val mergedData: String = dataRecorder.getCsvData()
         Log.i("merged data", mergedData)
 
         apiService.postData(mergedData)
-        dataRecorder.clearData()
+        dataRecorder.reset()
     }
 
     fun playSpeech() {
