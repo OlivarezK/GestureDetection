@@ -83,6 +83,7 @@ public class GestureDataRecorder {
 
     public String getDataAsCsvString() {
         StringBuilder csvContentBuilder = new StringBuilder();
+        // BUG: accDataPoints and gyroDataPoints are not the same size sometimes (Wont Fix)
         for (int i = 0; i < Math.min(accDataPoints.size(), gyroDataPoints.size()); i++) {
             float currentTime = timeDataPoints.get(i);
             ImuSensorReading accSample = accDataPoints.get(i);
