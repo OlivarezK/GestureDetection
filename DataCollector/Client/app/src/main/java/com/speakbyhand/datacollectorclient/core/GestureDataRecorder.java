@@ -23,7 +23,7 @@ class ImuSensorReading {
 public class GestureDataRecorder {
     private final SensorManager accManager, gyroManager;
     private final Sensor accSensor, gyroSensor;
-    private final int AVERAGE_DATA_POINTS_COUNT = 200;
+    private final int AVERAGE_DATA_POINTS_COUNT = 250;
     private final ArrayList<ImuSensorReading> accDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
     private final ArrayList<ImuSensorReading> gyroDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
     private final ArrayList<Float> timeDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
@@ -34,7 +34,6 @@ public class GestureDataRecorder {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
             accDataPoints.add(new ImuSensorReading(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]));
-            // does not need to be removed even when not used
             recordTimeMilliseconds();
         }
 
@@ -84,11 +83,12 @@ public class GestureDataRecorder {
 
     public String getDataAsCsvString() {
         StringBuilder csvContentBuilder = new StringBuilder();
-        for (int i = 0; i < accDataPoints.size(); i++) {
+        for (int i = 0; i < Math.min(accDataPoints.size(), gyroDataPoints.size()); i++) {
+            float currentTime = timeDataPoints.get(i);
             ImuSensorReading accSample = accDataPoints.get(i);
             ImuSensorReading gyroSample = gyroDataPoints.get(i);
-            float currentTime = timeDataPoints.get(i);
 
+            // Join x,y,z values of acc and gyro data samples by comma
             csvContentBuilder.append(String.join(",",
                     String.valueOf(currentTime),
                     String.valueOf(accSample.x),
@@ -96,7 +96,8 @@ public class GestureDataRecorder {
                     String.valueOf(accSample.z),
                     String.valueOf(gyroSample.x),
                     String.valueOf(gyroSample.y),
-                    String.valueOf(gyroSample.z)));
+                    String.valueOf(gyroSample.z))
+            );
             csvContentBuilder.append("\n");
         }
         return csvContentBuilder.toString();
