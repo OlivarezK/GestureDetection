@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
         val delimiterDetector = NewDelimiterDetector()
         val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
         val textToSpeech = TextToSpeech(applicationContext) {}
-        val gestureDataRecorder = GestureDataRecorder()
+        val gestureDataRecorder = GestureDataRecorder(this)
         val gestureDetector = GestureDetector()
         val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
 
@@ -74,16 +74,17 @@ class MainActivity : ComponentActivity() {
                     when (currentState) {
                         AppState.WaitingDelimiter -> WaitingDelimiter(
                             onStart = {
-                                delimiterDetector.start(sensorManager)
+                                // delimiterDetector.start(sensorManager)
                             },
                             detectDelimiter = {
-                                delimiterDetector.isDelimiterDetected
+                                false
+                                // delimiterDetector.isDelimiterDetected
                             },
                             onDelimiterDetected = {
                                 currentState = AppState.PerformingGesture
                             },
                             onFinish = {
-                                delimiterDetector.stop()
+                                // delimiterDetector.stop()
                             }
                         )
                         AppState.PerformingGesture -> PerformingGesture(
@@ -91,7 +92,7 @@ class MainActivity : ComponentActivity() {
                                 gestureDataRecorder.start()
                             },
                             detectGestureCode = {
-                                val gestureData = gestureDataRecorder.gestureData
+                                val gestureData = gestureDataRecorder.data
                                 val detection = gestureDetector.detect(gestureData)
                                 detectedGestureCode = detection
                                 Pair(detection != null, detection)

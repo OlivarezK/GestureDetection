@@ -56,14 +56,14 @@ public class DelimiterDetector implements SensorEventListener {
         }
     }
 
-    @Override public void onSensorChanged(SensorEvent event) {
+    @Override
+    public void onSensorChanged(SensorEvent event) {
         boolean accelerating = isAccelerating(event);
         long timestamp = event.timestamp;
         queue.add(timestamp, accelerating);
         if (queue.isShaking()) {
             queue.clear();
             listener.hearShake();
-
         }
     }
 
