@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
         val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
         val textToSpeech = TextToSpeech(applicationContext) {}
         val gestureDataRecorder = GestureDataRecorder(this)
-        val gestureDetector = GestureDetector()
+        val gestureDetector = GestureDetector(this)
         val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
 
         // UI
@@ -166,17 +166,16 @@ fun PerformingGesture(
     // Logic
     onStart()
     object : CountDownTimer(2000, 50) {
-        var hasDetectedGesture = false
-        var detectedGestureCode: GestureCode? = null
         override fun onTick(millisUntilFinished: Long) {
-            val detection = detectGestureCode()
-            hasDetectedGesture = detection.first
-            detectedGestureCode = detection.second
+
         }
 
         override fun onFinish() {
+            val detection = detectGestureCode()
+            val hasDetectedGesture = detection.first
+            val detectedGestureCode = detection.second
             if (hasDetectedGesture) {
-                onGestureDetected(detectedGestureCode!!)
+                onGestureDetected(detectedGestureCode)
             } else {
                 onGestureNotDetected()
             }

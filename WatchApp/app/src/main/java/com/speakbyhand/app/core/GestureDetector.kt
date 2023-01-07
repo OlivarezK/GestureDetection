@@ -1,66 +1,59 @@
-package com.speakbyhand.app.core;
+package com.speakbyhand.app.core
 
-import android.content.Context;
-
-import com.speakbyhand.app.ml.GestureConvModel;
-
-import org.tensorflow.lite.DataType;
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
-
-import java.io.IOException;
-
-public class GestureDetector {
-    Context context;
+import android.content.Context
+import android.content.res.AssetFileDescriptor
+import org.tensorflow.lite.DataType
+import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import java.io.FileInputStream
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
 
 
-    public GestureCode detect(GestureData data){
-        try {
-            GestureConvModel model = GestureConvModel.newInstance(context);
+class GestureDetector(var context: Context) {
 
-            TensorBuffer inputFeatures = TensorBuffer.createFixedSize(new int[]{1, 197, 6}, DataType.FLOAT32);
-            inputFeatures.loadArray(data.toArray());
+    fun detect(data: GestureData): GestureCode {
+        val interpreter = Interpreter(readModelFile())
+        val input = TensorBuffer.createFixedSize(intArrayOf(1, 197, 6), DataType.FLOAT32)
+        val output = TensorBuffer.createFixedSize(intArrayOf(1, 6), DataType.FLOAT32)
+        println(data.count)
+        input.loadArray(data.toArray())
+        interpreter.run(input.buffer, output.buffer);
 
-            GestureConvModel.Outputs outputs = model.process(inputFeatures);
-            TensorBuffer outputFeatures = outputs.getOutputFeature0AsTensorBuffer();
-            model.close();
+        val predictionIndex = getArgMax(output.floatArray)
+        return toGestureCode(predictionIndex)
+    }
 
-            int predictionIndex = getArgMax(outputFeatures.getFloatArray());
-            return toGestureCode(predictionIndex);
-        } catch (IOException e) {
-            // TODO Handle the exception
-        }
-
-        return GestureCode.DrinkWater;
+    fun readModelFile() : ByteBuffer {
+        val fileDescriptor: AssetFileDescriptor = context.assets.openFd("gesture_conv_model.tflite")
+        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+        val fileChannel: FileChannel = inputStream.getChannel()
+        val startOffset = fileDescriptor.startOffset
+        val declareLength = fileDescriptor.declaredLength
+        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declareLength)
     }
 
     // TODO: Create unit test for this method
-    private int getArgMax(float[] floatArray) {
-        int maxIndex = 0;
-        for (int i = 0; i < floatArray.length; i++) {
-            if(floatArray[i] > floatArray[maxIndex]){
-                maxIndex = i;
+    private fun getArgMax(floatArray: FloatArray): Int {
+        var maxIndex = 0
+        for (i in floatArray.indices) {
+            if (floatArray[i] > floatArray[maxIndex]) {
+                maxIndex = i
             }
         }
-        return maxIndex;
+        return maxIndex
     }
 
     // TODO: Create unit test for this method
-    private GestureCode toGestureCode(int predictionIndex){
-        switch (predictionIndex){
-            case 0:
-                return GestureCode.DrinkWater;
-            case 1:
-                return GestureCode.EatFood;
-            case 2:
-                return GestureCode.Help;
-            case 3:
-                return GestureCode.No;
-            case 4:
-                return GestureCode.Toilet;
-            case 5:
-                return GestureCode.Yes;
+    private fun toGestureCode(predictionIndex: Int): GestureCode {
+        when (predictionIndex) {
+            0 -> return GestureCode.DrinkWater
+            1 -> return GestureCode.EatFood
+            2 -> return GestureCode.Help
+            3 -> return GestureCode.No
+            4 -> return GestureCode.Toilet
+            5 -> return GestureCode.Yes
         }
-
-        throw new IllegalArgumentException("Given argument: "+predictionIndex);
+        throw IllegalArgumentException("Given argument: $predictionIndex")
     }
 }

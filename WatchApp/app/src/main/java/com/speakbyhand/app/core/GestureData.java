@@ -18,6 +18,22 @@ public class GestureData {
 
     public GestureData(String csvString){
         this();
+
+        for (String row : csvString.trim().split("\n")) {
+            String[] rowValues = row.split(",");
+            timeDataPoints.add(Float.parseFloat(rowValues[0]));
+            accReadings.add(new ImuSensorReading(
+                    Float.parseFloat(rowValues[1]),
+                    Float.parseFloat(rowValues[2]),
+                    Float.parseFloat(rowValues[3])
+            ));
+            gyroReadings.add(new ImuSensorReading(
+                    Float.parseFloat(rowValues[4]),
+                    Float.parseFloat(rowValues[5]),
+                    Float.parseFloat(rowValues[6])
+            ));
+        }
+
     }
 
     public void addAccelerometerData(float x, float y, float z){
@@ -25,8 +41,7 @@ public class GestureData {
     }
 
     public void addGyroscopeData(float x, float y, float z){
-        accReadings.add(new ImuSensorReading(x,y,z));
-
+        gyroReadings.add(new ImuSensorReading(x,y,z));
     }
 
     public void addTime(float milliseconds){
@@ -45,21 +60,22 @@ public class GestureData {
         }
     }
 
+    // TODO: Create unit tests for this
     public float[] toArray(){
-        int dataPointCount = getCount();
-        float[] data = new float[dataPointCount * 7];
-        for (int i = 0; i < dataPointCount; i++) {
-            float timeData = timeDataPoints.get(i);
-            ImuSensorReading accReading = accReadings.get(i);
-            ImuSensorReading gyroReading = gyroReadings.get(i);
+        int dataPointCount = 197;
+        float[] data = new float[dataPointCount * 6];
+        // TODO: BUG - size of input of model and number of collected data points may not be the same size
+        for (int index = 0; index < Math.min(getCount(), dataPointCount); index++) {
+            ImuSensorReading accReading = accReadings.get(index);
+            ImuSensorReading gyroReading = gyroReadings.get(index);
 
-            data[i] = timeData;
-            data[i+1] = accReading.x;
-            data[i+2] = accReading.y;
-            data[i+3] = accReading.z;
-            data[i+4] = gyroReading.x;
-            data[i+5] = gyroReading.y;
-            data[i+6] = gyroReading.z;
+            int relativeIndex = index * 6;
+            data[relativeIndex] = accReading.x;
+            data[relativeIndex+1] = accReading.y;
+            data[relativeIndex+2] = accReading.z;
+            data[relativeIndex+3] = gyroReading.x;
+            data[relativeIndex+4] = gyroReading.y;
+            data[relativeIndex+5] = gyroReading.z;
         }
         return data;
     }
