@@ -30,6 +30,7 @@ import androidx.wear.compose.material.Text
 import com.example.benchmarkapp.R
 import com.example.benchmarkapp.presentation.core.GestureDataReader
 import com.example.benchmarkapp.presentation.core.GestureDetector
+import com.example.benchmarkapp.presentation.core.TimeRecorder
 import com.example.benchmarkapp.presentation.theme.BenchmarkAppTheme
 import java.io.InputStream
 
@@ -45,15 +46,26 @@ class MainActivity : ComponentActivity() {
     fun startBenchmark(context: Context){
         val gestureDataReader = GestureDataReader()
         val gestureDetector = GestureDetector(context)
+        val timeRecorder = TimeRecorder()
 
-        // read data
-        gestureDataReader.readGestureData(context)
-        val gestureData = gestureDataReader.data
+        var filenames = arrayOf("Eat_1","Drink_1","Help_1","No_2","Toilet_1","Yes_1")
+        for (filename in filenames){
+            // read data
+            gestureDataReader.readGestureData(context, filename)
+            val gestureData = gestureDataReader.data
 
-        // feed data to model
-        val detection = gestureDetector.detect(gestureData)
-        Log.i("Prediction", detection.toString())
-        // predict
+            // feed data and run model
+            timeRecorder.startTimer()
+            val detection = gestureDetector.detect(gestureData)
+            var inferenceTime = timeRecorder.stopTimer()
+
+            // prediction
+            Log.i("File Name", filename)
+            Log.i("Inference Time", inferenceTime.toString())
+            Log.i("Prediction", detection.toString())
+
+            gestureDataReader.reset()
+        }
     }
 }
 
@@ -76,9 +88,11 @@ fun WearApp(onStart: () -> Unit) {
             Button(
                 enabled = currentState.value == IDLE_STATE,
                 onClick = {
-                    onStart()
                     currentState.value = RUNNING_MODEL_STATE
                     prompt = RUNNING_MODEL_STATE
+                    onStart()
+                    currentState.value = IDLE_STATE
+                    prompt = IDLE_STATE
                 }
             ) {
                 Text(text = "Start")
