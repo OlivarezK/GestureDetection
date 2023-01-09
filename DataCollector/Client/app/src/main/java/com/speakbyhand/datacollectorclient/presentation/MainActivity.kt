@@ -85,7 +85,7 @@ fun WearApp(onStart: () -> Unit, onStop: () -> Unit) {
 
     var nums :Long by remember{ mutableStateOf(2) }
     var setView: String by remember{ mutableStateOf("Click to Start...") }
-    val cuntNum = object :CountDownTimer(2000, 1000){
+    val cuntNum = object :CountDownTimer(2500, 1000){
         override fun onTick(millisUntilFinished: Long) {
             nums  = millisUntilFinished/1000
             setView = "$nums"
@@ -119,16 +119,6 @@ fun WearApp(onStart: () -> Unit, onStop: () -> Unit) {
             Text(
                 text = "$setView"
             )
-            // Stop Button
-            /*Button(
-                enabled = currentState.value == RECORDING_STATE,
-                onClick = {
-                    onStop()
-                    currentState.value = IDLE_STATE
-                },
-            ) {
-                Text(text = "Stop")
-            }*/
         }
     }
 }
