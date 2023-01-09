@@ -14,10 +14,11 @@ class GestureDetector(var context: Context) {
 
     fun detect(data: GestureData): GestureCode {
         val interpreter = Interpreter(readModelFile())
+
         val input = TensorBuffer.createFixedSize(intArrayOf(1, 197, 6), DataType.FLOAT32)
         val output = TensorBuffer.createFixedSize(intArrayOf(1, 6), DataType.FLOAT32)
-        println(data.count)
         input.loadArray(data.toArray())
+
         interpreter.run(input.buffer, output.buffer);
 
         val predictionIndex = getArgMax(output.floatArray)

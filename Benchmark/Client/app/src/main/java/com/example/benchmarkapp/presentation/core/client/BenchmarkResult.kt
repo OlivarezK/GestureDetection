@@ -1,14 +1,22 @@
 package com.example.benchmarkapp.presentation.core.client
 
-import org.json.JSONObject
+import com.example.benchmarkapp.presentation.core.GestureCode
+import org.json.JSONArray
 
 class BenchmarkResult {
+    val detectionInfos = listOf<GestureDetectionInfo>()
 
     fun toJsonString(): String {
-        return """
-            {
-               
-            }
-        """.trimIndent();
+        return JSONArray(detectionInfos).toString(4);
     }
 }
+
+
+class GestureDetectionInfo(
+    val inputFileName: String,
+    val modelResponseTimeMilliseconds: Number,
+    val prediction: GestureCode
+) {
+
+}
+
