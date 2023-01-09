@@ -66,4 +66,5 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
 
     implementation 'org.apache.commons:commons-csv:1.5'
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.10'
 }
