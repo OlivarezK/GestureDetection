@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ public class NewDelimiterDetector implements SensorEventListener {
         }
 
         accelerometer = sensorManager.getDefaultSensor(
-                Sensor.TYPE_ACCELEROMETER);
+                Sensor.TYPE_LINEAR_ACCELERATION);
 
 
         if (accelerometer != null) {
@@ -51,17 +52,22 @@ public class NewDelimiterDetector implements SensorEventListener {
         float y = event.values[0];
         float z = event.values[0];
         detector.update(x,y,z);
+        final double magnitudeSquared = x * x + y * y + z * z;
 
+//        Log.i("Accelerating Count", String.valueOf(detector.acceleratingCount));
+//        Log.i("Magnitude", String.valueOf(magnitudeSquared));
+//        Log.i("Magnitude", String.valueOf(detector.isShaking()));
+//        //Log.i("xyz", String.valueOf(x) + "," + String.valueOf(y) + "," + String.valueOf(z));
 
     }
 
 
 
     class Detector{
-        final int shakeThreshold = 700;
-        final float accelerationThreshold = 150;
-        final LimitedStack<Boolean> stack = new LimitedStack<>(2000);
-        int acceleratingCount = 0;
+        final int shakeThreshold = 10;
+        final float accelerationThreshold = 70;
+        final LimitedStack<Boolean> stack = new LimitedStack<>(50);
+        public int acceleratingCount = 0;
 
         public void update(float x, float y,float z){
             boolean accelerating = isAccelerating(x,y,z);

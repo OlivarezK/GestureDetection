@@ -47,9 +47,13 @@ public class LimitedStack<T> implements Iterable<T > {
     }
 
     public void clear(){
-        items.clear();
+        items = new ArrayList<>(maxCount);
+        for (int i = 0; i < maxCount; i++) {
+            items.add(null);
+        }
         topIndex = 0;
         bottomIndex = 0;
+        count = 0;
     }
 
     public T pop() {

@@ -61,12 +61,12 @@ class MainActivity : ComponentActivity() {
 
         val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-//        val delimiterDetector = NewDelimiterDetector()
-//        val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
-//        val textToSpeech = TextToSpeech(applicationContext) {}
-//        val gestureDataRecorder = GestureDataRecorder(this)
-//        val gestureDetector = GestureDetector(this)
-//        val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
+        val delimiterDetector = NewDelimiterDetector()
+        val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        val textToSpeech = TextToSpeech(applicationContext) {}
+        val gestureDataRecorder = GestureDataRecorder(this)
+        val gestureDetector = GestureDetector(this)
+        val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
 
         val accelerometer: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
@@ -114,71 +114,70 @@ class MainActivity : ComponentActivity() {
 //            }
 //        }
 //        // UI
-//        setContent {
-//            var currentState by rememberSaveable { mutableStateOf(AppState.WaitingDelimiter) }
-//            var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Sample) }
-//            SpeakByHandTheme {
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .background(MaterialTheme.colors.background),
-//                    verticalArrangement = Arrangement.Center
-//                ) {
-//                    when (currentState) {
-//                        AppState.WaitingDelimiter -> WaitingDelimiter(
-//                            onStart = {
-//                                //delimiterDetector.start(sensorManager)
-//                            },
-//                            detectDelimiter = {
-//                                false
-//                                //delimiterDetector.isDelimiterDetected
-//                            },
-//                            onDelimiterDetected = {
-//                                currentState = AppState.PerformingGesture
-//                            },
-//                            onFinish = {
-//                                //delimiterDetector.stop()
-//                            },
-//                            vibrator = vibrator
-//                        )
-//                        AppState.PerformingGesture -> PerformingGesture(
-//                            onStart = {
-//                                gestureDataRecorder.start()
-//                            },
-//                            detectGestureCode = {
-//                                val gestureData = gestureDataRecorder.data
-//                                val detection = gestureDetector.detect(gestureData)
-//                                detectedGestureCode = detection
-//                                Pair(detection != null, detection)
-//                            },
-//                            onGestureDetected = {
-//                                currentState = AppState.SpeakingPhrase
-//                            },
-//                            onGestureNotDetected = {
-//                                currentState = AppState.UnknownGesture
-//                            },
-//                            onFinish = {
-//                                gestureDataRecorder.reset()
-//                                gestureDataRecorder.stop()
-//                            }
-//                        )
-//                        AppState.SpeakingPhrase -> SpeakingPhrase(
-//                            textToSpeech = textToSpeech,
-//                            phrase = gestureToPhrase.toMappedPhrase(detectedGestureCode),
-//                            onFinish = {
-//                                currentState = AppState.WaitingDelimiter
-//                            }
-//                        )
-//                        AppState.UnknownGesture -> UnknownGesture(
-//                            vibrator = vibrator,
-//                            onFinish = {
-//                                currentState = AppState.WaitingDelimiter
-//                            }
-//                        )
-//                    }
-//                }
-//            }
-//        }
+        setContent {
+            var currentState by rememberSaveable { mutableStateOf(AppState.WaitingDelimiter) }
+            var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Sample) }
+            SpeakByHandTheme {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colors.background),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    when (currentState) {
+                        AppState.WaitingDelimiter -> WaitingDelimiter(
+                            onStart = {
+                                delimiterDetector.start(sensorManager)
+                            },
+                            detectDelimiter = {
+                                delimiterDetector.isDelimiterDetected
+                            },
+                            onDelimiterDetected = {
+                                currentState = AppState.PerformingGesture
+                            },
+                            onFinish = {
+                                delimiterDetector.stop()
+                            },
+                            vibrator = vibrator
+                        )
+                        AppState.PerformingGesture -> PerformingGesture(
+                            onStart = {
+                                gestureDataRecorder.start()
+                            },
+                            detectGestureCode = {
+                                val gestureData = gestureDataRecorder.data
+                                val detection = gestureDetector.detect(gestureData)
+                                detectedGestureCode = detection
+                                Pair(detection != null, detection)
+                            },
+                            onGestureDetected = {
+                                currentState = AppState.SpeakingPhrase
+                            },
+                            onGestureNotDetected = {
+                                currentState = AppState.UnknownGesture
+                            },
+                            onFinish = {
+                                gestureDataRecorder.reset()
+                                gestureDataRecorder.stop()
+                            }
+                        )
+                        AppState.SpeakingPhrase -> SpeakingPhrase(
+                            textToSpeech = textToSpeech,
+                            phrase = gestureToPhrase.toMappedPhrase(detectedGestureCode),
+                            onFinish = {
+                                currentState = AppState.WaitingDelimiter
+                            }
+                        )
+                        AppState.UnknownGesture -> UnknownGesture(
+                            vibrator = vibrator,
+                            onFinish = {
+                                currentState = AppState.WaitingDelimiter
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -193,17 +192,18 @@ fun WaitingDelimiter(
     // Logic
     onStart()
     thread {
-        // Disabled for testing
-        /*val isDelimiterDetected = detectDelimiter()
-        while (!isDelimiterDetected){
-            Thread.sleep(500)
-        }*/
-        detectDelimiter()
-        Thread.sleep(5000)
+        // Disabled for testing#
+        do {
+            val isDelimiterDetected = detectDelimiter()
+        } while (!isDelimiterDetected);
+//        detectDelimiter()
+//        Thread.sleep(5000)
         onDelimiterDetected()
         val mVibratePattern = longArrayOf(0, 500, 500, 500)
-        val effect = VibrationEffect.createWaveform(mVibratePattern, -1)
+        val effect = VibrationEffect.createOneShot(500, -1)
         vibrator.vibrate(effect)
+
+
         onFinish()
     }
 
@@ -222,6 +222,10 @@ fun PerformingGesture(
 ) {
     // Logic
     onStart()
+    val startTime = System.currentTimeMillis();
+    do {
+        val currentTime = System.currentTimeMillis()
+    } while (currentTime - startTime < 1000);
     object : CountDownTimer(2000, 50) {
         override fun onTick(millisUntilFinished: Long) {
 
