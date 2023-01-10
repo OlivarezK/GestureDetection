@@ -67,7 +67,7 @@ public class NewDelimiterDetector implements SensorEventListener {
         }
     }
 
-    private boolean isAccelerating(SensorEvent event) {
+    public boolean isAccelerating(SensorEvent event) {
         float ax = event.values[0];
         float ay = event.values[1];
         float az = event.values[2];

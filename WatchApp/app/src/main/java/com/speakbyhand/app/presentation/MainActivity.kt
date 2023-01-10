@@ -6,12 +6,17 @@
 
 package com.speakbyhand.app.presentation
 
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.speech.tts.TextToSpeech
+import android.util.Log
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -31,7 +36,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.Text
 import com.speakbyhand.app.R
 import com.speakbyhand.app.core.*
 import com.speakbyhand.app.presentation.theme.SpeakByHandTheme
@@ -53,100 +60,150 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        val delimiterDetector = NewDelimiterDetector()
-        val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
-        val textToSpeech = TextToSpeech(applicationContext) {}
-        val gestureDataRecorder = GestureDataRecorder(this)
-        val gestureDetector = GestureDetector(this)
-        val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+//        val delimiterDetector = NewDelimiterDetector()
+//        val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+//        val textToSpeech = TextToSpeech(applicationContext) {}
+//        val gestureDataRecorder = GestureDataRecorder(this)
+//        val gestureDetector = GestureDetector(this)
+//        val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
 
-        // UI
-        setContent {
-            var currentState by rememberSaveable { mutableStateOf(AppState.WaitingDelimiter) }
-            var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Sample) }
-            SpeakByHandTheme {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colors.background),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    when (currentState) {
-                        AppState.WaitingDelimiter -> WaitingDelimiter(
-                            onStart = {
-                                // delimiterDetector.start(sensorManager)
-                            },
-                            detectDelimiter = {
-                                false
-                                // delimiterDetector.isDelimiterDetected
-                            },
-                            onDelimiterDetected = {
-                                currentState = AppState.PerformingGesture
-                            },
-                            onFinish = {
-                                // delimiterDetector.stop()
-                            }
-                        )
-                        AppState.PerformingGesture -> PerformingGesture(
-                            onStart = {
-                                gestureDataRecorder.start()
-                            },
-                            detectGestureCode = {
-                                val gestureData = gestureDataRecorder.data
-                                val detection = gestureDetector.detect(gestureData)
-                                detectedGestureCode = detection
-                                Pair(detection != null, detection)
-                            },
-                            onGestureDetected = {
-                                currentState = AppState.SpeakingPhrase
-                            },
-                            onGestureNotDetected = {
-                                currentState = AppState.UnknownGesture
-                            },
-                            onFinish = {
-                                gestureDataRecorder.reset()
-                                gestureDataRecorder.stop()
-                            }
-                        )
-                        AppState.SpeakingPhrase -> SpeakingPhrase(
-                            textToSpeech = textToSpeech,
-                            phrase = gestureToPhrase.toMappedPhrase(detectedGestureCode),
-                            onFinish = {
-                                currentState = AppState.WaitingDelimiter
-                            }
-                        )
-                        AppState.UnknownGesture -> UnknownGesture(
-                            vibrator = vibrator,
-                            onFinish = {
-                                currentState = AppState.WaitingDelimiter
-                            }
-                        )
-                    }
-                }
-            }
-        }
+        val accelerometer: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+//        setContent{
+//            var magnitude by rememberSaveable { mutableStateOf("0") }
+//            var errorMessage by rememberSaveable { mutableStateOf("0") }
+//
+//            val sensorThing = object : SensorEventListener{
+//                override fun onSensorChanged(event: SensorEvent?) {
+//                    if(event == null){return;}
+//                    val ax = event.values[0]
+//                    val ay = event.values[1]
+//                    val az = event.values[2]
+//
+//                    val magnitudeSquared = (ax * ax + ay * ay + az * az).toDouble()
+//                    magnitude = magnitudeSquared.toString();
+//                    Log.i("magnitude", magnitude)
+//                }
+//
+//                override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+//
+//                }
+//
+//
+//            }
+//
+//            try{
+//                sensorManager.registerListener(sensorThing, accelerometer, SensorManager.SENSOR_DELAY_FASTEST)
+//
+//            } catch (e: Exception){
+//                Log.i("Error",e.message.toString())
+//            }
+//
+//            SpeakByHandTheme {
+//                Column(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .background(MaterialTheme.colors.background),
+//                    verticalArrangement = Arrangement.Center
+//                ) {
+//                    Text(text = magnitude.toString())
+//                    Text(text = errorMessage.toString())
+//
+//                }
+//            }
+//        }
+//        // UI
+//        setContent {
+//            var currentState by rememberSaveable { mutableStateOf(AppState.WaitingDelimiter) }
+//            var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Sample) }
+//            SpeakByHandTheme {
+//                Column(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .background(MaterialTheme.colors.background),
+//                    verticalArrangement = Arrangement.Center
+//                ) {
+//                    when (currentState) {
+//                        AppState.WaitingDelimiter -> WaitingDelimiter(
+//                            onStart = {
+//                                //delimiterDetector.start(sensorManager)
+//                            },
+//                            detectDelimiter = {
+//                                false
+//                                //delimiterDetector.isDelimiterDetected
+//                            },
+//                            onDelimiterDetected = {
+//                                currentState = AppState.PerformingGesture
+//                            },
+//                            onFinish = {
+//                                //delimiterDetector.stop()
+//                            },
+//                            vibrator = vibrator
+//                        )
+//                        AppState.PerformingGesture -> PerformingGesture(
+//                            onStart = {
+//                                gestureDataRecorder.start()
+//                            },
+//                            detectGestureCode = {
+//                                val gestureData = gestureDataRecorder.data
+//                                val detection = gestureDetector.detect(gestureData)
+//                                detectedGestureCode = detection
+//                                Pair(detection != null, detection)
+//                            },
+//                            onGestureDetected = {
+//                                currentState = AppState.SpeakingPhrase
+//                            },
+//                            onGestureNotDetected = {
+//                                currentState = AppState.UnknownGesture
+//                            },
+//                            onFinish = {
+//                                gestureDataRecorder.reset()
+//                                gestureDataRecorder.stop()
+//                            }
+//                        )
+//                        AppState.SpeakingPhrase -> SpeakingPhrase(
+//                            textToSpeech = textToSpeech,
+//                            phrase = gestureToPhrase.toMappedPhrase(detectedGestureCode),
+//                            onFinish = {
+//                                currentState = AppState.WaitingDelimiter
+//                            }
+//                        )
+//                        AppState.UnknownGesture -> UnknownGesture(
+//                            vibrator = vibrator,
+//                            onFinish = {
+//                                currentState = AppState.WaitingDelimiter
+//                            }
+//                        )
+//                    }
+//                }
+//            }
+//        }
     }
 }
-
 
 @Composable
 fun WaitingDelimiter(
     onStart: () -> Unit,
     detectDelimiter: () -> Boolean,
     onDelimiterDetected: () -> Unit,
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
+    vibrator: Vibrator
 ) {
     // Logic
     onStart()
     thread {
         // Disabled for testing
-/*      val isDelimiterDetected = detectDelimiter()
+        /*val isDelimiterDetected = detectDelimiter()
         while (!isDelimiterDetected){
             Thread.sleep(500)
         }*/
         detectDelimiter()
         Thread.sleep(5000)
         onDelimiterDetected()
+        val mVibratePattern = longArrayOf(0, 500, 500, 500)
+        val effect = VibrationEffect.createWaveform(mVibratePattern, -1)
+        vibrator.vibrate(effect)
         onFinish()
     }
 
