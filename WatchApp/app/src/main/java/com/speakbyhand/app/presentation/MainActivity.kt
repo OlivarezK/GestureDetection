@@ -42,6 +42,7 @@ import androidx.wear.compose.material.Text
 import com.speakbyhand.app.R
 import com.speakbyhand.app.core.*
 import com.speakbyhand.app.presentation.theme.SpeakByHandTheme
+import kotlinx.coroutines.delay
 import kotlin.concurrent.thread
 import kotlin.math.roundToInt
 
@@ -59,8 +60,9 @@ class MainActivity : ComponentActivity() {
         // Logic
         super.onCreate(savedInstanceState)
 
-        val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         val delimiterDetector = NewDelimiterDetector()
         val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
         val textToSpeech = TextToSpeech(applicationContext) {}
@@ -68,52 +70,7 @@ class MainActivity : ComponentActivity() {
         val gestureDetector = GestureDetector(this)
         val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
 
-        val accelerometer: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-
-//        setContent{
-//            var magnitude by rememberSaveable { mutableStateOf("0") }
-//            var errorMessage by rememberSaveable { mutableStateOf("0") }
-//
-//            val sensorThing = object : SensorEventListener{
-//                override fun onSensorChanged(event: SensorEvent?) {
-//                    if(event == null){return;}
-//                    val ax = event.values[0]
-//                    val ay = event.values[1]
-//                    val az = event.values[2]
-//
-//                    val magnitudeSquared = (ax * ax + ay * ay + az * az).toDouble()
-//                    magnitude = magnitudeSquared.toString();
-//                    Log.i("magnitude", magnitude)
-//                }
-//
-//                override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-//
-//                }
-//
-//
-//            }
-//
-//            try{
-//                sensorManager.registerListener(sensorThing, accelerometer, SensorManager.SENSOR_DELAY_FASTEST)
-//
-//            } catch (e: Exception){
-//                Log.i("Error",e.message.toString())
-//            }
-//
-//            SpeakByHandTheme {
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .background(MaterialTheme.colors.background),
-//                    verticalArrangement = Arrangement.Center
-//                ) {
-//                    Text(text = magnitude.toString())
-//                    Text(text = errorMessage.toString())
-//
-//                }
-//            }
-//        }
-//        // UI
+        // UI
         setContent {
             var currentState by rememberSaveable { mutableStateOf(AppState.WaitingDelimiter) }
             var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Sample) }
@@ -192,17 +149,19 @@ fun WaitingDelimiter(
     // Logic
     onStart()
     thread {
-        // Disabled for testing#
+        // Disabled for testing
         do {
             val isDelimiterDetected = detectDelimiter()
-        } while (!isDelimiterDetected);
+        } while (!isDelimiterDetected)
+
 //        detectDelimiter()
 //        Thread.sleep(5000)
-        onDelimiterDetected()
-        val mVibratePattern = longArrayOf(0, 500, 500, 500)
-        val effect = VibrationEffect.createOneShot(500, -1)
-        vibrator.vibrate(effect)
 
+        onDelimiterDetected()
+
+        val mVibratePattern = longArrayOf(0, 500, 500, 500)
+        val effect = VibrationEffect.createWaveform(mVibratePattern, -1)
+        vibrator.vibrate(effect)
 
         onFinish()
     }
@@ -221,12 +180,14 @@ fun PerformingGesture(
     onFinish: () -> Unit
 ) {
     // Logic
-    onStart()
     val startTime = System.currentTimeMillis();
     do {
         val currentTime = System.currentTimeMillis()
-    } while (currentTime - startTime < 1000);
-    object : CountDownTimer(2000, 50) {
+    } while (currentTime - startTime < 2000)
+
+    onStart()
+
+    object : CountDownTimer(2000, 1000) {
         override fun onTick(millisUntilFinished: Long) {
 
         }
@@ -298,6 +259,7 @@ fun Timer(
     var currentTime by remember { mutableStateOf(totalTime) }
     LaunchedEffect(key1 = currentTime) {
         if (currentTime > 0) {
+            delay(10L)
             currentTime -= 50L
             value = currentTime / totalTime.toFloat()
         }
