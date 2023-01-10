@@ -13,9 +13,9 @@ import java.nio.charset.Charset;
 public class GestureDataReader {
     private GestureData gestureData = new GestureData();
 
-    public void readGestureData(Context context){
+    public void readGestureData(Context context, String filename){
         try {
-            InputStream is = context.getAssets().open("Drink_1");
+            InputStream is = context.getAssets().open(filename);
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(is, Charset.forName("UTF-8"))
             );
@@ -32,6 +32,8 @@ public class GestureDataReader {
             e.printStackTrace();
         }
     }
+
+    public void reset() {gestureData = new GestureData();}
 
     public GestureData getData() {return gestureData;}
 
