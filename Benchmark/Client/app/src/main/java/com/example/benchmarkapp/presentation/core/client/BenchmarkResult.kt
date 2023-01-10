@@ -7,11 +7,11 @@ import org.json.JSONObject
 class BenchmarkResult(val modelName: String) {
     val detectionInfos = listOf<GestureDetectionInfo>()
 
-    fun toJsonString(): String {
+    fun toJson(): JSONObject {
         val jsonContent = JSONObject();
         jsonContent.put("modelName", modelName)
         jsonContent.put("detection", JSONArray(detectionInfos))
-        return jsonContent.toString(4);
+        return jsonContent;
     }
 }
 

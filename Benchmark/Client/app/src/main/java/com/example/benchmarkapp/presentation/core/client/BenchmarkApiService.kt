@@ -12,14 +12,16 @@ import okhttp3.ResponseBody;
 import android.util.Log;
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 
 class BenchmarkApiService {
     private val client: OkHttpClient = OkHttpClient()
 
-    /*fun postData(result: BenchmarkResult) {
+    fun postData(result: List<BenchmarkResult>) {
         val endpoint = "http:/192.168.100.7:5000/benchmark"
         val mediaType = "application/json; charset=utf-8".toMediaType()
-        val formBody: RequestBody = result.toJsonString().toRequestBody(mediaType)
+        val content = JSONArray(result);
+        val formBody: RequestBody = content.toString().toRequestBody(mediaType)
         val request: Request = Request.Builder()
             .url(endpoint)
             .post(formBody)
@@ -39,6 +41,6 @@ class BenchmarkApiService {
                 }
             }
         )
-    }*/
+    }
 
 }
