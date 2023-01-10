@@ -9,32 +9,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NewDelimiterDetector implements SensorEventListener {
-    public static final int SENSITIVITY_LIGHT = 11;
-    public static final int SENSITIVITY_MEDIUM = 13;
-    public static final int SENSITIVITY_HARD = 15;
-
-    private static final int DEFAULT_ACCELERATION_THRESHOLD = SENSITIVITY_LIGHT;
-    private int accelerationThreshold = DEFAULT_ACCELERATION_THRESHOLD;
-
-
-    private final SampleQueue queue = new SampleQueue();
     private SensorManager sensorManager;
     private Sensor accelerometer;
-    private boolean isDelimitedDetected = false;
-
+    private final Detector detector = new Detector();
 
     public boolean start(SensorManager sensorManager) {
         return start(sensorManager, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     public boolean start(SensorManager sensorManager, int sensorDelay) {
-        isDelimitedDetected = false;
         if (accelerometer != null) {
             return true;
         }
 
         accelerometer = sensorManager.getDefaultSensor(
                 Sensor.TYPE_ACCELEROMETER);
+
 
         if (accelerometer != null) {
             this.sensorManager = sensorManager;
@@ -45,39 +35,56 @@ public class NewDelimiterDetector implements SensorEventListener {
 
     public void stop() {
         if (accelerometer != null) {
-            isDelimitedDetected = false;
-            queue.clear();
             sensorManager.unregisterListener(this, accelerometer);
             sensorManager = null;
             accelerometer = null;
+            detector.reset();
         }
     }
 
     public boolean isDelimiterDetected(){
-        return isDelimitedDetected;
+        return detector.isShaking();
     }
 
     @Override public void onSensorChanged(SensorEvent event) {
-        boolean accelerating = isAccelerating(event);
-        long timestamp = event.timestamp;
-        queue.add(timestamp, accelerating);
-        if (queue.isShaking()) {
-            queue.clear();
-            isDelimitedDetected = true;
+        float x = event.values[0];
+        float y = event.values[0];
+        float z = event.values[0];
+        detector.update(x,y,z);
+    }
+
+
+
+    class Detector{
+        final int shakeThreshold = 700;
+        final float accelerationThreshold = 150;
+        final LimitedStack<Boolean> stack = new LimitedStack<>(2000);
+        int acceleratingCount = 0;
+
+        public void update(float x, float y,float z){
+            boolean accelerating = isAccelerating(x,y,z);
+            if(stack.isFull() && stack.bottom()){
+                acceleratingCount -= 1;
+            }
+            if(accelerating){
+                acceleratingCount += 1;
+            }
+            stack.push(accelerating);
         }
-    }
 
-    public boolean isAccelerating(SensorEvent event) {
-        float ax = event.values[0];
-        float ay = event.values[1];
-        float az = event.values[2];
+        public void reset(){
+            stack.clear();
+            acceleratingCount = 0;
+        }
 
-        final double magnitudeSquared = ax * ax + ay * ay + az * az;
-        return magnitudeSquared > accelerationThreshold * accelerationThreshold;
-    }
+        public boolean isAccelerating(float x, float y,float z){
+            final double magnitudeSquared = x * x + y * y + z * z;
+            return magnitudeSquared > accelerationThreshold;
+        }
 
-    public void setSensitivity(int accelerationThreshold) {
-        this.accelerationThreshold = accelerationThreshold;
+        public boolean isShaking(){
+            return acceleratingCount > shakeThreshold;
+        }
     }
 
     static class SampleQueue {

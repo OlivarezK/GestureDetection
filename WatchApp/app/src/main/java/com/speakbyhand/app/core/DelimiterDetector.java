@@ -4,7 +4,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class DelimiterDetector implements SensorEventListener {
@@ -79,6 +83,12 @@ public class DelimiterDetector implements SensorEventListener {
     public void setSensitivity(int accelerationThreshold) {
         this.accelerationThreshold = accelerationThreshold;
     }
+
+    static class Detector {
+
+    }
+
+
 
     static class SampleQueue {
 
@@ -188,6 +198,7 @@ public class DelimiterDetector implements SensorEventListener {
         }
     }
 
-    @Override public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 }
