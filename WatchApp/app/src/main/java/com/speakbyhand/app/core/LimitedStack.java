@@ -15,6 +15,9 @@ public class LimitedStack<T> implements Iterable<T > {
 
     public LimitedStack(int maxCount) {
         items = new ArrayList<>(maxCount);
+        for (int i = 0; i < maxCount; i++) {
+            items.add(null);
+        }
         this.maxCount = maxCount;
         topIndex = 0;
         bottomIndex = 0;
@@ -36,8 +39,9 @@ public class LimitedStack<T> implements Iterable<T > {
         items.set(getNextIndex(topIndex), item);
         topIndex = getNextIndex(topIndex);
 
-        if(!isFull()){
+        if(isFull()){
             bottomIndex = getNextIndex(bottomIndex);
+        } else {
             count += 1;
         }
     }
@@ -61,8 +65,9 @@ public class LimitedStack<T> implements Iterable<T > {
 
     private int getNextIndex(int index) {
         int nextIndex = index + 1;
-        if (nextIndex > maxCount - 1) {
-            nextIndex += 1;
+        if (nextIndex >= maxCount) {
+
+            nextIndex = 0;
         }
         return nextIndex;
     }
@@ -99,7 +104,7 @@ public class LimitedStack<T> implements Iterable<T > {
 
         @Override
         public T next() {
-            T top = top();
+            T top = items.get(currentIndex);
             currentIndex = getPreviousIndex(currentIndex);
             return top;
         }
