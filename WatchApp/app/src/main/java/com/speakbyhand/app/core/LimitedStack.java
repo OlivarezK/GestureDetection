@@ -36,7 +36,7 @@ public class LimitedStack<T> implements Iterable<T > {
 
 
     public void push(T item) {
-        items.set(getNextIndex(topIndex), item);
+        items.set(topIndex, item);
         topIndex = getNextIndex(topIndex);
 
         if(isFull()){
@@ -95,17 +95,17 @@ public class LimitedStack<T> implements Iterable<T > {
     }
 
     class DelimiterDetectorIterator implements  Iterator<T>{
-        int currentIndex = topIndex;
+        int currentIndex = bottomIndex;
 
         @Override
         public boolean hasNext() {
-            return getPreviousIndex(currentIndex) != bottomIndex;
+            return getNextIndex(currentIndex) != topIndex;
         }
 
         @Override
         public T next() {
             T top = items.get(currentIndex);
-            currentIndex = getPreviousIndex(currentIndex);
+            currentIndex = getNextIndex(currentIndex);
             return top;
         }
     }

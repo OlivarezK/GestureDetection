@@ -51,6 +51,8 @@ public class NewDelimiterDetector implements SensorEventListener {
         float y = event.values[0];
         float z = event.values[0];
         detector.update(x,y,z);
+
+
     }
 
 

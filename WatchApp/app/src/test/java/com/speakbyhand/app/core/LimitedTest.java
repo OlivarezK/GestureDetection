@@ -15,7 +15,7 @@ public class LimitedTest {
     @Test
     void testAddOverflowDeletesBottomOfStack(){
         LimitedStack<Integer> stack = new LimitedStack<>(5);
-        List<Integer> values = Arrays.asList(1,2,3,4,5,6,7,8,10);
+        List<Integer> values = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
         List<Integer> expectedValues = Arrays.asList(6,7,8,9,10);
 
         values.forEach(stack::push);
