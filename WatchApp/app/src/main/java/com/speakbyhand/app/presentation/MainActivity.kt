@@ -16,7 +16,9 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import android.view.MotionEvent
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -44,6 +46,7 @@ import com.speakbyhand.app.core.*
 import com.speakbyhand.app.presentation.theme.SpeakByHandTheme
 import kotlinx.coroutines.delay
 import kotlin.concurrent.thread
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
@@ -51,10 +54,22 @@ enum class AppState {
     WaitingDelimiter,
     PerformingGesture,
     SpeakingPhrase,
-    UnknownGesture
+    UnknownGesture,
+    ButtonMode
 }
 
-class MainActivity : ComponentActivity() {
+enum class AppMode{
+    ShakeMode,
+    ButtonMode
+}
+
+class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGestureListener {
+
+    // Declaring gesture detector, swipe threshold, and swipe velocity threshold
+    private lateinit var swipeDetector: android.view.GestureDetector
+    private val swipeThreshold = 100
+    private val swipeVelocityThreshold = 100
+    private var isSwiped = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Logic
@@ -70,9 +85,12 @@ class MainActivity : ComponentActivity() {
         val gestureDetector = GestureDetector(this)
         val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
 
+        swipeDetector = android.view.GestureDetector(this)
+
         // UI
         setContent {
             var currentState by rememberSaveable { mutableStateOf(AppState.WaitingDelimiter) }
+            var mode by rememberSaveable { mutableStateOf(AppMode.ShakeMode) }
             var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Sample) }
             SpeakByHandTheme {
                 Column(
@@ -95,7 +113,28 @@ class MainActivity : ComponentActivity() {
                             onFinish = {
                                 delimiterDetector.stop()
                             },
+                            detectSwipe = {
+                                isSwiped
+                            },
+                            onModeChanged = {
+                                isSwiped = false
+                                currentState = AppState.ButtonMode
+                                mode = AppMode.ButtonMode
+                            },
                             vibrator = vibrator
+                        )
+                        AppState.ButtonMode -> ButtonMode(
+                            onStart = {
+                                currentState = AppState.PerformingGesture
+                            },
+                            detectSwipe = {
+                                isSwiped
+                            },
+                            onModeChanged = {
+                                isSwiped = false
+                                currentState = AppState.WaitingDelimiter
+                                mode = AppMode.ShakeMode
+                            }
                         )
                         AppState.PerformingGesture -> PerformingGesture(
                             onStart = {
@@ -122,19 +161,78 @@ class MainActivity : ComponentActivity() {
                             textToSpeech = textToSpeech,
                             phrase = gestureToPhrase.toMappedPhrase(detectedGestureCode),
                             onFinish = {
-                                currentState = AppState.WaitingDelimiter
+                                currentState = when(mode){
+                                    AppMode.ShakeMode -> AppState.WaitingDelimiter
+                                    AppMode.ButtonMode -> AppState.ButtonMode
+                                }
                             }
                         )
                         AppState.UnknownGesture -> UnknownGesture(
                             vibrator = vibrator,
                             onFinish = {
-                                currentState = AppState.WaitingDelimiter
+                                currentState = when(mode){
+                                    AppMode.ShakeMode -> AppState.WaitingDelimiter
+                                    AppMode.ButtonMode -> AppState.ButtonMode
+                                }
                             }
                         )
                     }
                 }
             }
         }
+    }
+
+    // Override this method to recognize touch event
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        return if (swipeDetector.onTouchEvent(event)) {
+            true
+        }
+        else {
+            super.onTouchEvent(event)
+        }
+    }
+
+    // All the below methods are GestureDetector.OnGestureListener members
+    override fun onDown(e: MotionEvent?): Boolean {
+        return false
+    }
+
+    override fun onShowPress(e: MotionEvent?) {
+        return
+    }
+
+    override fun onSingleTapUp(e: MotionEvent?): Boolean {
+        return false
+    }
+
+    override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+        return false
+    }
+
+    override fun onLongPress(e: MotionEvent?) {
+        return
+    }
+
+    override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+        try {
+            val diffY = e2.y - e1.y
+            val diffX = e2.x - e1.x
+            if (abs(diffX) < abs(diffY)) {
+                if (abs(diffY) > swipeThreshold && abs(velocityY) > swipeVelocityThreshold) {
+                    if (diffX > 0) {
+                        Toast.makeText(applicationContext, "Up swipe gesture", Toast.LENGTH_SHORT).show()
+                        isSwiped = true
+                    }
+                    else {
+                        Toast.makeText(applicationContext, "Down swipe gesture", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+        catch (exception: Exception) {
+            exception.printStackTrace()
+        }
+        return true
     }
 }
 
@@ -144,6 +242,8 @@ fun WaitingDelimiter(
     detectDelimiter: () -> Boolean,
     onDelimiterDetected: () -> Unit,
     onFinish: () -> Unit,
+    detectSwipe: () -> Boolean,
+    onModeChanged: () -> Unit,
     vibrator: Vibrator
 ) {
     // Logic
@@ -152,16 +252,21 @@ fun WaitingDelimiter(
         // Disabled for testing
         do {
             val isDelimiterDetected = detectDelimiter()
-        } while (!isDelimiterDetected)
+            val isSwitched = detectSwipe()
+        } while (!isDelimiterDetected && !isSwitched)
 
 //        detectDelimiter()
 //        Thread.sleep(5000)
 
-        onDelimiterDetected()
+        if (detectSwipe()){
+            onModeChanged()
+        }else{
+            onDelimiterDetected()
 
-        val mVibratePattern = longArrayOf(0, 500, 500, 500)
-        val effect = VibrationEffect.createWaveform(mVibratePattern, -1)
-        vibrator.vibrate(effect)
+            val mVibratePattern = longArrayOf(0, 500, 500, 500)
+            val effect = VibrationEffect.createWaveform(mVibratePattern, -1)
+            vibrator.vibrate(effect)
+        }
 
         onFinish()
     }
@@ -169,6 +274,37 @@ fun WaitingDelimiter(
     // UI
     ShowText(stringResource(R.string.shake), fontSize = 30.sp)
 
+}
+
+@Composable
+fun ButtonMode(
+    onStart: () -> Unit,
+    detectSwipe: () -> Boolean,
+    onModeChanged: () -> Unit
+){
+    //Logic
+    thread{
+        do {
+            val isSwitched = detectSwipe()
+        } while (!isSwitched)
+
+        onModeChanged()
+    }
+
+    //UI
+    Column(
+        modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colors.background),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(onClick = {
+            onStart()
+        }) {
+            Text(text = "Start")
+        }
+    }
 }
 
 @Composable
