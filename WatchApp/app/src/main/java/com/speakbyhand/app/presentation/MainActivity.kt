@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
@@ -33,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -161,6 +163,7 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
                         AppState.SpeakingPhrase -> SpeakingPhrase(
                             textToSpeech = textToSpeech,
                             phrase = gestureToPhrase.toMappedPhrase(detectedGestureCode),
+                            gesture = detectedGestureCode,
                             onFinish = {
                                 currentState = when(mode){
                                     AppMode.ShakeMode -> AppState.WaitingDelimiter
@@ -286,7 +289,6 @@ fun ButtonMode(
         do {
             val isSwitched = detectSwipe()
         } while (!isSwitched)
-
         onModeChanged()
     }
 
@@ -354,7 +356,7 @@ fun PerformingGesture(
 }
 
 @Composable
-fun SpeakingPhrase(textToSpeech: TextToSpeech, phrase: String, onFinish: () -> Unit) {
+fun SpeakingPhrase(textToSpeech: TextToSpeech, phrase: String, onFinish: () -> Unit, gesture: GestureCode) {
     // Logic
     textToSpeech.speak(phrase, TextToSpeech.QUEUE_FLUSH, null, null)
     thread {
@@ -365,7 +367,28 @@ fun SpeakingPhrase(textToSpeech: TextToSpeech, phrase: String, onFinish: () -> U
     }
 
     // UI
-    ShowImage()
+    gestureDisplay(gesture)
+}
+
+@Composable
+fun gestureDisplay(gesture: GestureCode){
+    Image(
+        painterResource(
+            when(gesture){
+                GestureCode.Yes -> R.drawable.yes
+                GestureCode.Help -> R.drawable.help
+                GestureCode.DrinkWater -> R.drawable.drink
+                GestureCode.EatFood -> R.drawable.eat
+                GestureCode.No -> R.drawable.no
+                else -> {R.drawable.yes}
+            }
+        ),
+        contentDescription = null,
+        modifier = Modifier
+            .fillMaxWidth()
+            .requiredSize(100.dp),
+        alignment = Alignment.Center
+    )
 }
 
 @Composable
