@@ -65,7 +65,7 @@ public class NewDelimiterDetector implements SensorEventListener {
 
     class Detector{
         final int shakeThreshold = 20;
-        final float accelerationThreshold = 100;
+        final float accelerationThreshold = 80;
         final LimitedStack<Boolean> stack = new LimitedStack<>(50);
         public int acceleratingCount = 0;
 

@@ -134,7 +134,8 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
                                 isSwiped = false
                                 currentState = AppState.WaitingDelimiter
                                 mode = AppMode.ShakeMode
-                            }
+                            },
+                            vibrator = vibrator
                         )
                         AppState.PerformingGesture -> PerformingGesture(
                             onStart = {
@@ -260,8 +261,8 @@ fun WaitingDelimiter(
         }else{
             onDelimiterDetected()
 
-            val mVibratePattern = longArrayOf(0, 500, 500, 500)
-            val effect = VibrationEffect.createWaveform(mVibratePattern, -1)
+            //val mVibratePattern = longArrayOf(0, 500, 500, 500)
+            val effect = VibrationEffect.createOneShot(500, -1)
             vibrator.vibrate(effect)
         }
 
@@ -277,7 +278,8 @@ fun WaitingDelimiter(
 fun ButtonMode(
     onStart: () -> Unit,
     detectSwipe: () -> Boolean,
-    onModeChanged: () -> Unit
+    onModeChanged: () -> Unit,
+    vibrator: Vibrator
 ){
     //Logic
     thread{
@@ -298,6 +300,9 @@ fun ButtonMode(
     ) {
         Button(onClick = {
             onStart()
+
+            val effect = VibrationEffect.createOneShot(500, -1)
+            vibrator.vibrate(effect)
         },
         modifier = Modifier.size(120.dp)) {
             Text(text = "START", fontSize = 20.sp)
@@ -317,11 +322,11 @@ fun PerformingGesture(
     val startTime = System.currentTimeMillis();
     do {
         val currentTime = System.currentTimeMillis()
-    } while (currentTime - startTime < 2000)
+    } while (currentTime - startTime < 1200)
 
     onStart()
 
-    object : CountDownTimer(2000, 1000) {
+    object : CountDownTimer(3000, 1000) {
         override fun onTick(millisUntilFinished: Long) {
 
         }
@@ -341,7 +346,7 @@ fun PerformingGesture(
 
     // UI
     Timer(
-        totalTime = 2L * 1000L,
+        totalTime = 3L * 1000L,
         inactiveBarColor = Color.DarkGray,
         activeBarColor = MaterialTheme.colors.primary,
         modifier = Modifier.size(200.dp)
@@ -393,7 +398,7 @@ fun Timer(
     var currentTime by remember { mutableStateOf(totalTime) }
     LaunchedEffect(key1 = currentTime) {
         if (currentTime > 0) {
-            delay(10L)
+            delay(15L)
             currentTime -= 50L
             value = currentTime / totalTime.toFloat()
         }
