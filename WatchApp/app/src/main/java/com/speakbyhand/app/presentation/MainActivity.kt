@@ -220,11 +220,8 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
             if (abs(diffX) < abs(diffY)) {
                 if (abs(diffY) > swipeThreshold && abs(velocityY) > swipeVelocityThreshold) {
                     if (diffX > 0) {
-                        Toast.makeText(applicationContext, "Up swipe gesture", Toast.LENGTH_SHORT).show()
+                        //Toast.makeText(applicationContext, "Switched mode", Toast.LENGTH_SHORT).show()
                         isSwiped = true
-                    }
-                    else {
-                        Toast.makeText(applicationContext, "Down swipe gesture", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -301,8 +298,9 @@ fun ButtonMode(
     ) {
         Button(onClick = {
             onStart()
-        }) {
-            Text(text = "Start")
+        },
+        modifier = Modifier.size(120.dp)) {
+            Text(text = "START", fontSize = 20.sp)
         }
     }
 }
