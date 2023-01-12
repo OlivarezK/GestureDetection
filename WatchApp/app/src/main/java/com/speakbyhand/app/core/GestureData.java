@@ -81,7 +81,7 @@ public class GestureData {
     }
 
     public int getCount(){
-        return accReadings.size();
+        return Math.min(accReadings.size(), gyroReadings.size());
     }
 
 }

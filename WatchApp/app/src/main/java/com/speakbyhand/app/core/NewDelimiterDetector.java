@@ -55,8 +55,8 @@ public class NewDelimiterDetector implements SensorEventListener {
         final double magnitudeSquared = x * x + y * y + z * z;
 
 //        Log.i("Accelerating Count", String.valueOf(detector.acceleratingCount));
-//        Log.i("Magnitude", String.valueOf(magnitudeSquared));
-//        Log.i("Magnitude", String.valueOf(detector.isShaking()));
+//        Log.i("Magnitude", pauseDetector.pauseCount);
+//        Log.i("Magnitude", String.valueOf(pauseDetector.isPaused()));
 //        //Log.i("xyz", String.valueOf(x) + "," + String.valueOf(y) + "," + String.valueOf(z));
 
     }
@@ -64,7 +64,7 @@ public class NewDelimiterDetector implements SensorEventListener {
 
 
     class Detector{
-        final int shakeThreshold = 20;
+        final int shakeThreshold = 15;
         final float accelerationThreshold = 80;
         final LimitedStack<Boolean> stack = new LimitedStack<>(50);
         public int acceleratingCount = 0;
@@ -94,6 +94,8 @@ public class NewDelimiterDetector implements SensorEventListener {
             return acceleratingCount > shakeThreshold;
         }
     }
+
+
 
     static class SampleQueue {
 
