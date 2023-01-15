@@ -158,10 +158,10 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
                             onFinish = {
                                 gestureDataRecorder.reset()
                                 gestureDataRecorder.stop()
-                            },
-                            detectPause = {
-                                gestureDataRecorder.isPaused()
                             }
+//                            detectPause = {
+//                                gestureDataRecorder.isPaused()
+//                            }
                         )
                         AppState.SpeakingPhrase -> SpeakingPhrase(
                             textToSpeech = textToSpeech,
@@ -323,8 +323,8 @@ fun PerformingGesture(
     detectGestureCode: () -> Pair<Boolean, GestureCode>,
     onGestureDetected: (GestureCode) -> Unit,
     onGestureNotDetected: () -> Unit,
-    onFinish: () -> Unit,
-    detectPause: () -> Boolean
+    onFinish: () -> Unit
+//    detectPause: () -> Boolean
 ) {
     // Logic
 //    val startTime = System.currentTimeMillis();
@@ -336,12 +336,12 @@ fun PerformingGesture(
 
     val countDownTimer = object : CountDownTimer(3000, 10) {
         override fun onTick(millisUntilFinished: Long) {
-            val gestureDone = detectPause()
-            if (gestureDone){
-                cancel()
-                this.onFinish()
-                Log.i("Status", "Cancelled")
-            }
+//            val gestureDone = detectPause()
+//            if (gestureDone){
+//                cancel()
+//                this.onFinish()
+//                Log.i("Status", "Cancelled")
+//            }
         }
 
         override fun onFinish() {

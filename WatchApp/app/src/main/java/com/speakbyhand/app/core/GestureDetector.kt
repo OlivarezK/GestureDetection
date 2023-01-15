@@ -27,7 +27,7 @@ class GestureDetector(var context: Context) {
     }
 
     fun readModelFile() : ByteBuffer {
-        val fileDescriptor: AssetFileDescriptor = context.assets.openFd("gesture_conv_model_n.tflite")
+        val fileDescriptor: AssetFileDescriptor = context.assets.openFd("gesture_recurr_model_n.tflite")
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
         val fileChannel: FileChannel = inputStream.getChannel()
         val startOffset = fileDescriptor.startOffset
