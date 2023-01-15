@@ -6,19 +6,14 @@
 
 package com.speakbyhand.app.presentation
 
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.speech.tts.TextToSpeech
-import android.util.Log
 import android.view.MotionEvent
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas

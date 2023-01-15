@@ -5,8 +5,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.CountDownTimer;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GestureDataRecorder {
     private GestureData gestureData = new GestureData();
@@ -14,6 +16,11 @@ public class GestureDataRecorder {
     private final SensorManager accManager, gyroManager;
     private final Sensor accSensor, gyroSensor;
     private final SensorEventListener accListener, gyroListener;
+    private final List<Float> filtered_data;
+
+    private float g_x = 0f, g_y = 0f, g_z = 9.8f;
+    private float new_a_x, new_a_y, new_a_z;
+    private float alpha = 0.9f;
 //    private final PauseDetector pauseDetector = new PauseDetector();
 
     public GestureDataRecorder(Context onCreateContext) {
@@ -21,13 +28,20 @@ public class GestureDataRecorder {
         gyroManager = (SensorManager) onCreateContext.getSystemService(Context.SENSOR_SERVICE);
         accSensor = accManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         gyroSensor = gyroManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        filtered_data = new ArrayList<>(3);
 //        linearSensor = gyroManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         accListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                gestureData.addAccelerometerData(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
-                recordTimeMilliseconds();
+                // use when using filtered model
+//                filtered_data.clear();
+//                filterData(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
+//                gestureData.addAccelerometerData(filtered_data.get(0), filtered_data.get(1), filtered_data.get(2));
 
+                // use when not using filtered model
+                gestureData.addAccelerometerData(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
+
+                recordTimeMilliseconds();
             }
 
             @Override
@@ -116,6 +130,20 @@ public class GestureDataRecorder {
         gyroManager.unregisterListener(gyroListener);
 //        gyroManager.unregisterListener(linearListener);
 //        pauseDetector.reset();
+    }
+
+    private void filterData(float a_x, float a_y, float a_z){
+        g_x = alpha * g_x + (1 - alpha) * a_x;
+        g_y = alpha * g_y + (1 - alpha) * a_y;
+        g_z = alpha * g_z + (1 - alpha) * a_z;
+
+        new_a_x = a_x - g_x;
+        new_a_y = a_y - g_y;
+        new_a_z = a_z - g_z;
+
+        filtered_data.add(new_a_x);
+        filtered_data.add(new_a_y);
+        filtered_data.add(new_a_z);
     }
 
     public void reset(){
