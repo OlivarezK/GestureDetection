@@ -226,10 +226,11 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
             val diffX = e2.x - e1.x
             if (abs(diffX) < abs(diffY)) {
                 if (abs(diffY) > swipeThreshold && abs(velocityY) > swipeVelocityThreshold) {
-                    if (diffX > 0) {
-                        //Toast.makeText(applicationContext, "Switched mode", Toast.LENGTH_SHORT).show()
-                        isSwiped = true
-                    }
+                    isSwiped = true
+//                    if (diffX > 0) {
+//                        //Toast.makeText(applicationContext, "Switched mode", Toast.LENGTH_SHORT).show()
+//                        isSwiped = true
+//                    }
                 }
             }
         }
@@ -326,10 +327,10 @@ fun PerformingGesture(
     detectPause: () -> Boolean
 ) {
     // Logic
-    val startTime = System.currentTimeMillis();
-    do {
-        val currentTime = System.currentTimeMillis()
-    } while (currentTime - startTime < 1200)
+//    val startTime = System.currentTimeMillis();
+//    do {
+//        val currentTime = System.currentTimeMillis()
+//    } while (currentTime - startTime < 1200)
 
     onStart()
 
