@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GestureData {
-    private final int AVERAGE_DATA_POINTS_COUNT = 250;
+    private final int AVERAGE_DATA_POINTS_COUNT = 300;
     private final List<ImuSensorReading> accReadings;
     private final List<ImuSensorReading> gyroReadings;
     private final List<Float> timeDataPoints;
@@ -62,7 +62,7 @@ public class GestureData {
 
     // TODO: Create unit tests for this
     public float[] toArray(){
-        int dataPointCount = 197;
+        int dataPointCount = 297;
         float[] data = new float[dataPointCount * 6];
         // TODO: BUG - size of input of model and number of collected data points may not be the same size
         for (int index = 0; index < Math.min(getCount(), dataPointCount); index++) {

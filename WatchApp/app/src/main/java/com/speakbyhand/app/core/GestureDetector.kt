@@ -16,7 +16,7 @@ class GestureDetector(var context: Context) {
     fun detect(data: GestureData): GestureCode {
         Log.i("Data Count: ", data.count.toString())
         val interpreter = Interpreter(readModelFile())
-        val input = TensorBuffer.createFixedSize(intArrayOf(1, 197, 6), DataType.FLOAT32)
+        val input = TensorBuffer.createFixedSize(intArrayOf(1, 297, 6), DataType.FLOAT32)
         val output = TensorBuffer.createFixedSize(intArrayOf(1, 6), DataType.FLOAT32)
         println(data.count)
         input.loadArray(data.toArray())
@@ -27,7 +27,7 @@ class GestureDetector(var context: Context) {
     }
 
     fun readModelFile() : ByteBuffer {
-        val fileDescriptor: AssetFileDescriptor = context.assets.openFd("gesture_conv_model.tflite")
+        val fileDescriptor: AssetFileDescriptor = context.assets.openFd("gesture_conv_model_n.tflite")
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
         val fileChannel: FileChannel = inputStream.getChannel()
         val startOffset = fileDescriptor.startOffset
