@@ -24,6 +24,8 @@ class GestureDetector(var context: Context) {
 
         if(arePredictionsAboveConfidenceLevel(output.floatArray)){
             val predictionIndex = getArgMax(output.floatArray)
+            Log.i("result", output.floatArray[predictionIndex].toString())
+
             return toGestureCode(predictionIndex)
         } else {
             return GestureCode.Unknown;
