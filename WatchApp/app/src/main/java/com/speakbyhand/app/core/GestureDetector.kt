@@ -22,8 +22,13 @@ class GestureDetector(var context: Context) {
         input.loadArray(data.toArray())
         interpreter.run(input.buffer, output.buffer);
 
-        val predictionIndex = getArgMax(output.floatArray)
-        return toGestureCode(predictionIndex)
+        if(arePredictionsAboveConfidenceLevel(output.floatArray)){
+            val predictionIndex = getArgMax(output.floatArray)
+            return toGestureCode(predictionIndex)
+        } else {
+            return GestureCode.Unknown;
+        }
+
     }
 
     fun readModelFile() : ByteBuffer {
@@ -33,6 +38,16 @@ class GestureDetector(var context: Context) {
         val startOffset = fileDescriptor.startOffset
         val declareLength = fileDescriptor.declaredLength
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declareLength)
+    }
+
+    private fun arePredictionsAboveConfidenceLevel(floatArray: FloatArray) : Boolean{
+        for (i in floatArray.indices) {
+            if (floatArray[i] > .6f) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // TODO: Create unit test for this method

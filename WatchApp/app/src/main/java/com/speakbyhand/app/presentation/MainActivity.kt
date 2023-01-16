@@ -403,7 +403,8 @@ fun gestureDisplay(gesture: GestureCode){
                 GestureCode.DrinkWater -> R.drawable.drink
                 GestureCode.EatFood -> R.drawable.eat
                 GestureCode.No -> R.drawable.no
-                else -> {R.drawable.toilet}
+                GestureCode.Toilet -> R.drawable.toilet
+                else -> {R.drawable.unknown}
             }
         ),
         contentDescription = null,

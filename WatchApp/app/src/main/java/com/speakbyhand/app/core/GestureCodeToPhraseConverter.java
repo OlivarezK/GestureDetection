@@ -25,6 +25,8 @@ public class GestureCodeToPhraseConverter {
                 return "Yes";
             case No:
                 return "No";
+            case Unknown:
+                return "";
         }
         return "";
 

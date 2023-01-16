@@ -7,5 +7,6 @@ public enum GestureCode {
     DrinkWater,
     Help,
     Yes,
-    No
+    No,
+    Unknown
 }
