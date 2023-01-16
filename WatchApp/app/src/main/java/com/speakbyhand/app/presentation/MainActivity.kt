@@ -6,19 +6,15 @@
 
 package com.speakbyhand.app.presentation
 
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.speech.tts.TextToSpeech
-import android.util.Log
+import android.speech.tts.UtteranceProgressListener
 import android.view.MotionEvent
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -158,7 +154,11 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
                             onFinish = {
                                 gestureDataRecorder.reset()
                                 gestureDataRecorder.stop()
-                            }
+                            },
+                            vibrator = vibrator
+//                            detectPause = {
+//                                gestureDataRecorder.isPaused()
+//                            }
                         )
                         AppState.SpeakingPhrase -> SpeakingPhrase(
                             textToSpeech = textToSpeech,
@@ -223,10 +223,11 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
             val diffX = e2.x - e1.x
             if (abs(diffX) < abs(diffY)) {
                 if (abs(diffY) > swipeThreshold && abs(velocityY) > swipeVelocityThreshold) {
-                    if (diffX > 0) {
-                        //Toast.makeText(applicationContext, "Switched mode", Toast.LENGTH_SHORT).show()
-                        isSwiped = true
-                    }
+                    isSwiped = true
+//                    if (diffX > 0) {
+//                        //Toast.makeText(applicationContext, "Switched mode", Toast.LENGTH_SHORT).show()
+//                        isSwiped = true
+//                    }
                 }
             }
         }
@@ -289,6 +290,7 @@ fun ButtonMode(
         do {
             val isSwitched = detectSwipe()
         } while (!isSwitched)
+
         onModeChanged()
     }
 
@@ -318,19 +320,26 @@ fun PerformingGesture(
     detectGestureCode: () -> Pair<Boolean, GestureCode>,
     onGestureDetected: (GestureCode) -> Unit,
     onGestureNotDetected: () -> Unit,
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
+    vibrator: Vibrator
+//    detectPause: () -> Boolean
 ) {
     // Logic
-    val startTime = System.currentTimeMillis();
-    do {
-        val currentTime = System.currentTimeMillis()
-    } while (currentTime - startTime < 1200)
+//    val startTime = System.currentTimeMillis();
+//    do {
+//        val currentTime = System.currentTimeMillis()
+//    } while (currentTime - startTime < 1200)
 
     onStart()
 
-    object : CountDownTimer(3000, 1000) {
+    val countDownTimer = object : CountDownTimer(3000, 10) {
         override fun onTick(millisUntilFinished: Long) {
-
+//            val gestureDone = detectPause()
+//            if (gestureDone){
+//                cancel()
+//                this.onFinish()
+//                Log.i("Status", "Cancelled")
+//            }
         }
 
         override fun onFinish() {
@@ -342,9 +351,15 @@ fun PerformingGesture(
             } else {
                 onGestureNotDetected()
             }
+
+            val effect = VibrationEffect.createOneShot(500, -1)
+            vibrator.vibrate(effect)
+
             onFinish()
         }
-    }.start()
+    }
+
+    countDownTimer.start()
 
     // UI
     Timer(
@@ -358,13 +373,21 @@ fun PerformingGesture(
 @Composable
 fun SpeakingPhrase(textToSpeech: TextToSpeech, phrase: String, onFinish: () -> Unit, gesture: GestureCode) {
     // Logic
-    textToSpeech.speak(phrase, TextToSpeech.QUEUE_FLUSH, null, null)
-    thread {
-        do {
-            val speakingEnd = textToSpeech.isSpeaking
-        } while (speakingEnd)
-        onFinish()
-    }
+    textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener(){
+        override fun onStart(p0: String?) {
+
+        }
+
+        override fun onDone(p0: String?) {
+            onFinish()
+        }
+
+        override fun onError(p0: String?) {
+
+        }
+    })
+    textToSpeech.speak(phrase, TextToSpeech.QUEUE_FLUSH, null, "123")
+
 
     // UI
     gestureDisplay(gesture)
@@ -380,7 +403,8 @@ fun gestureDisplay(gesture: GestureCode){
                 GestureCode.DrinkWater -> R.drawable.drink
                 GestureCode.EatFood -> R.drawable.eat
                 GestureCode.No -> R.drawable.no
-                else -> {R.drawable.yes}
+                GestureCode.Toilet -> R.drawable.toilet
+                else -> {R.drawable.unknown}
             }
         ),
         contentDescription = null,

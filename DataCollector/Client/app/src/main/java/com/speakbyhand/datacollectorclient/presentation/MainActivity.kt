@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -41,6 +42,8 @@ class MainActivity : ComponentActivity() {
     lateinit var tts: TextToSpeech
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         apiService = GestureDataApiService()
         dataRecorder = GestureDataRecorder(this)
 
@@ -83,12 +86,12 @@ fun WearApp(onStart: () -> Unit, onStop: () -> Unit) {
     val RECORDING_STATE = "RECORDING"
     val currentState = remember { mutableStateOf(IDLE_STATE) }
 
-    var nums :Long by remember{ mutableStateOf(2) }
+    var nums :Long by remember{ mutableStateOf(3) }
     var setView: String by remember{ mutableStateOf("Click to Start...") }
-    val cuntNum = object :CountDownTimer(2500, 1000){
+    val cuntNum = object :CountDownTimer(3000, 10){
         override fun onTick(millisUntilFinished: Long) {
-            nums  = millisUntilFinished/1000
             setView = "$nums"
+            nums  = millisUntilFinished/1000
         }
         override fun onFinish() {
             setView = "Click to Start..."
