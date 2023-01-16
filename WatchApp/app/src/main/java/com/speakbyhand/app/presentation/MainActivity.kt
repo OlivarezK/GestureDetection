@@ -12,6 +12,7 @@ import android.os.CountDownTimer
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.view.MotionEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -153,7 +154,8 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
                             onFinish = {
                                 gestureDataRecorder.reset()
                                 gestureDataRecorder.stop()
-                            }
+                            },
+                            vibrator = vibrator
 //                            detectPause = {
 //                                gestureDataRecorder.isPaused()
 //                            }
@@ -318,7 +320,8 @@ fun PerformingGesture(
     detectGestureCode: () -> Pair<Boolean, GestureCode>,
     onGestureDetected: (GestureCode) -> Unit,
     onGestureNotDetected: () -> Unit,
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
+    vibrator: Vibrator
 //    detectPause: () -> Boolean
 ) {
     // Logic
@@ -348,6 +351,10 @@ fun PerformingGesture(
             } else {
                 onGestureNotDetected()
             }
+
+            val effect = VibrationEffect.createOneShot(500, -1)
+            vibrator.vibrate(effect)
+
             onFinish()
         }
     }
@@ -366,13 +373,21 @@ fun PerformingGesture(
 @Composable
 fun SpeakingPhrase(textToSpeech: TextToSpeech, phrase: String, onFinish: () -> Unit, gesture: GestureCode) {
     // Logic
-    textToSpeech.speak(phrase, TextToSpeech.QUEUE_FLUSH, null, null)
-    thread {
-        do {
-            val speakingEnd = textToSpeech.isSpeaking
-        } while (speakingEnd)
-        onFinish()
-    }
+    textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener(){
+        override fun onStart(p0: String?) {
+
+        }
+
+        override fun onDone(p0: String?) {
+            onFinish()
+        }
+
+        override fun onError(p0: String?) {
+
+        }
+    })
+    textToSpeech.speak(phrase, TextToSpeech.QUEUE_FLUSH, null, "123")
+
 
     // UI
     gestureDisplay(gesture)
