@@ -72,6 +72,7 @@ class GestureDetector(var context: Context) {
             3 -> return GestureCode.No
             4 -> return GestureCode.Toilet
             5 -> return GestureCode.Yes
+//            6 -> return GestureCode.Unknown
         }
         throw IllegalArgumentException("Given argument: $predictionIndex")
     }
