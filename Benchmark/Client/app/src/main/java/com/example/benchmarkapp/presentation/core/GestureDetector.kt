@@ -10,7 +10,7 @@ import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 
 
-class GestureDetector(var context: Context) {
+class GestureDetector(var context: Context, private val modelFilePath: String) {
 
     fun detect(data: GestureData): GestureCode {
         val interpreter = Interpreter(readModelFile())
@@ -26,9 +26,9 @@ class GestureDetector(var context: Context) {
     }
 
     fun readModelFile() : ByteBuffer {
-        val fileDescriptor: AssetFileDescriptor = context.assets.openFd("gesture_conv_model.tflite")
+        val fileDescriptor: AssetFileDescriptor = context.assets.openFd(modelFilePath)
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-        val fileChannel: FileChannel = inputStream.getChannel()
+        val fileChannel: FileChannel = inputStream.channel
         val startOffset = fileDescriptor.startOffset
         val declareLength = fileDescriptor.declaredLength
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declareLength)

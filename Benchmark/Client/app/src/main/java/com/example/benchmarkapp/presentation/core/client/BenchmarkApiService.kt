@@ -17,10 +17,10 @@ import org.json.JSONArray
 class BenchmarkApiService {
     private val client: OkHttpClient = OkHttpClient()
 
-    fun postData(result: List<BenchmarkResult>) {
-        val endpoint = "http:/192.168.100.7:5000/benchmark"
+    fun postData(benchmarkResults: List<BenchmarkResult>) {
+        val endpoint = "http://192.168.1.2:5000/benchmark"
         val mediaType = "application/json; charset=utf-8".toMediaType()
-        val content = JSONArray(result);
+        val content = toJsonArray(benchmarkResults);
         val formBody: RequestBody = content.toString().toRequestBody(mediaType)
         val request: Request = Request.Builder()
             .url(endpoint)
@@ -41,6 +41,14 @@ class BenchmarkApiService {
                 }
             }
         )
+    }
+
+    fun toJsonArray(benchmarkResult: List<BenchmarkResult>) : JSONArray{
+        val jsonArray = JSONArray()
+        benchmarkResult.forEach {
+            jsonArray.put(it.toJson())
+        }
+        return jsonArray;
     }
 
 }

@@ -9,30 +9,26 @@ package com.example.benchmarkapp.presentation
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
-import com.example.benchmarkapp.R
 import com.example.benchmarkapp.presentation.core.GestureDataReader
 import com.example.benchmarkapp.presentation.core.GestureDetector
 import com.example.benchmarkapp.presentation.core.TimeRecorder
+import com.example.benchmarkapp.presentation.core.client.BenchmarkApiService
+import com.example.benchmarkapp.presentation.core.client.BenchmarkResult
 import com.example.benchmarkapp.presentation.theme.BenchmarkAppTheme
-import java.io.InputStream
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,29 +39,43 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun startBenchmark(context: Context){
+    fun startBenchmark(context: Context) {
         val gestureDataReader = GestureDataReader()
-        val gestureDetector = GestureDetector(context)
         val timeRecorder = TimeRecorder()
+        val apiService = BenchmarkApiService();
 
-        var filenames = arrayOf("Eat_1","Drink_1","Help_1","No_2","Toilet_1","Yes_1")
-        for (filename in filenames){
-            // read data
-            gestureDataReader.readGestureData(context, filename)
-            val gestureData = gestureDataReader.data
+        val modelNames = arrayOf("Convolutional Model")
+        val modelFilePaths = arrayOf("gesture_conv_model.tflite")
+        val dataFileNames = arrayOf("Eat_1", "Drink_1", "Help_1", "No_2", "Toilet_1", "Yes_1")
 
-            // feed data and run model
-            timeRecorder.startTimer()
-            val detection = gestureDetector.detect(gestureData)
-            var inferenceTime = timeRecorder.stopTimer()
+        val benchmarkResults = modelNames.zip(modelFilePaths).map { it ->
+            val modelName = it.first
+            val modelPath = it.second
+            val gestureDetector = GestureDetector(context, modelPath)
+            val benchmarkResult = BenchmarkResult(modelName)
+            for (filename in dataFileNames) {
+                // read data
+                gestureDataReader.readGestureData(context, filename)
+                val gestureData = gestureDataReader.data
 
-            // prediction
-            Log.i("File Name", filename)
-            Log.i("Inference Time", inferenceTime.toString())
-            Log.i("Prediction", detection.toString())
+                // feed data and run model
+                timeRecorder.startTimer()
+                val detection = gestureDetector.detect(gestureData)
+                val inferenceTime = timeRecorder.stopTimer()
 
-            gestureDataReader.reset()
+                // prediction
+                Log.i("File Name", filename)
+                Log.i("Inference Time", inferenceTime.toString())
+                Log.i("Prediction", detection.toString())
+                benchmarkResult.add(filename, inferenceTime, detection);
+
+                gestureDataReader.reset()
+            }
+            benchmarkResult;
         }
+
+        apiService.postData(benchmarkResults)
+
     }
 }
 
@@ -75,7 +85,7 @@ fun WearApp(onStart: () -> Unit) {
     val RUNNING_MODEL_STATE = "RUNNING"
     val currentState = remember { mutableStateOf(IDLE_STATE) }
 
-    var prompt: String by remember{ mutableStateOf("${IDLE_STATE}") }
+    var prompt: String by remember { mutableStateOf("${IDLE_STATE}") }
 
     BenchmarkAppTheme {
         Column(

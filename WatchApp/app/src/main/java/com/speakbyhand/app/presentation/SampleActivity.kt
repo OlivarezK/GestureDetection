@@ -171,9 +171,3 @@ fun WearApp(content: @Composable () -> Unit) {
         }
     }
 }
-
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
-@Composable
-fun DefaultPreview() {
-    WearApp { ShowText(stringResource(R.string.app_name), fontSize = 30.sp) }
-}

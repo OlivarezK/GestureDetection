@@ -10,7 +10,6 @@ public class TimeRecorder {
 
     public long stopTimer(){
         currMilli = System.currentTimeMillis();
-
         return currMilli - startMilli;
     }
 }

@@ -5,12 +5,35 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class BenchmarkResult(val modelName: String) {
-    val detectionInfos = listOf<GestureDetectionInfo>()
+    private val detectionInfos = mutableListOf<GestureDetectionInfo>()
+
+    fun add(
+        inputFileName: String,
+        modelResponseTimeMilliseconds: Number,
+        prediction: GestureCode
+    ) {
+        detectionInfos.add(
+            GestureDetectionInfo(
+                inputFileName,
+                modelResponseTimeMilliseconds,
+                prediction
+            )
+        )
+    }
 
     fun toJson(): JSONObject {
         val jsonContent = JSONObject();
         jsonContent.put("modelName", modelName)
-        jsonContent.put("detection", JSONArray(detectionInfos))
+
+        val detectionInfoJsonArray = JSONArray()
+        detectionInfos.forEach {
+            val detectionInfoObject = JSONObject()
+            detectionInfoObject.put("filename", it.inputFileName)
+            detectionInfoObject.put("responseTimeMs", it.modelResponseTimeMilliseconds)
+            detectionInfoObject.put("prediction", it.prediction)
+            detectionInfoJsonArray.put(detectionInfoObject)
+        }
+        jsonContent.put("detection", detectionInfoJsonArray)
         return jsonContent;
     }
 }
