@@ -30,7 +30,6 @@ class GestureDetector(var context: Context) {
         } else {
             return GestureCode.Unknown;
         }
-
     }
 
     fun readModelFile() : ByteBuffer {

@@ -45,9 +45,9 @@ class MainActivity : ComponentActivity() {
         val timeRecorder = TimeRecorder()
         val apiService = BenchmarkApiService()
 
-        val modelNames = arrayOf("Convolutional Model")
-        val modelFilePaths = arrayOf("gesture_conv_model.tflite")
-        val dataFileNames = arrayOf("Eat_1", "Drink_1", "Help_1", "No_2", "Toilet_1", "Yes_1")
+        val modelNames = arrayOf("Convolutional Model", "Recurrrent Model")
+        val modelFilePaths = arrayOf("gesture_conv_model_n.tflite", "gesture_recurr_model_n.tflite")
+        val dataFileNames = arrayOf("Eat_1_n_n", "Drink_1_n_n", "Help_1_n_n", "No_1_n_n", "Toilet_1_n_n", "Yes_1_n_n")
 
         val benchmarkResults = modelNames.zip(modelFilePaths).map { (modelName, modelPath) ->
             val gestureDetector = GestureDetector(context, modelPath)

@@ -15,7 +15,7 @@ class GestureDetector(var context: Context, private val modelFilePath: String) {
     fun detect(data: GestureData): GestureCode {
         val interpreter = Interpreter(readModelFile())
 
-        val input = TensorBuffer.createFixedSize(intArrayOf(1, 197, 6), DataType.FLOAT32)
+        val input = TensorBuffer.createFixedSize(intArrayOf(1, 297, 6), DataType.FLOAT32)
         val output = TensorBuffer.createFixedSize(intArrayOf(1, 6), DataType.FLOAT32)
         input.loadArray(data.toArray())
 
@@ -54,6 +54,7 @@ class GestureDetector(var context: Context, private val modelFilePath: String) {
             3 -> return GestureCode.No
             4 -> return GestureCode.Toilet
             5 -> return GestureCode.Yes
+//            6 -> return GestureCode.Unknown
         }
         throw IllegalArgumentException("Given argument: $predictionIndex")
     }
