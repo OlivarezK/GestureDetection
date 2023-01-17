@@ -35,14 +35,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            WearApp({ startBenchmark(this) })
+            WearApp { startBenchmark(this) }
         }
     }
 
-    fun startBenchmark(context: Context) {
+    private fun startBenchmark(context: Context) {
         val gestureDataReader = GestureDataReader()
         val timeRecorder = TimeRecorder()
-        val apiService = BenchmarkApiService();
+        val apiService = BenchmarkApiService()
 
         val modelNames = arrayOf("Convolutional Model")
         val modelFilePaths = arrayOf("gesture_conv_model.tflite")
@@ -65,11 +65,11 @@ class MainActivity : ComponentActivity() {
                 Log.i("File Name", filename)
                 Log.i("Inference Time", inferenceTime.toString())
                 Log.i("Prediction", detection.toString())
-                benchmarkResult.add(filename, inferenceTime, detection);
+                benchmarkResult.add(filename, inferenceTime, detection)
 
                 gestureDataReader.reset()
             }
-            benchmarkResult;
+            benchmarkResult
         }
 
         apiService.postData(benchmarkResults)
@@ -83,7 +83,7 @@ fun WearApp(onStart: () -> Unit) {
     val RUNNING_MODEL_STATE = "RUNNING"
     val currentState = remember { mutableStateOf(IDLE_STATE) }
 
-    var prompt: String by remember { mutableStateOf("${IDLE_STATE}") }
+    var prompt: String by remember { mutableStateOf(IDLE_STATE) }
 
     BenchmarkAppTheme {
         Column(
@@ -106,7 +106,7 @@ fun WearApp(onStart: () -> Unit) {
                 Text(text = "Start")
             }
             Text(
-                text = "$prompt"
+                text = prompt
             )
         }
     }
