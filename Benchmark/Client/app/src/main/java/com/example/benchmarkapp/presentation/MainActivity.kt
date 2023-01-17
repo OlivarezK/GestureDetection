@@ -48,9 +48,7 @@ class MainActivity : ComponentActivity() {
         val modelFilePaths = arrayOf("gesture_conv_model.tflite")
         val dataFileNames = arrayOf("Eat_1", "Drink_1", "Help_1", "No_2", "Toilet_1", "Yes_1")
 
-        val benchmarkResults = modelNames.zip(modelFilePaths).map { it ->
-            val modelName = it.first
-            val modelPath = it.second
+        val benchmarkResults = modelNames.zip(modelFilePaths).map { (modelName, modelPath) ->
             val gestureDetector = GestureDetector(context, modelPath)
             val benchmarkResult = BenchmarkResult(modelName)
             for (filename in dataFileNames) {
