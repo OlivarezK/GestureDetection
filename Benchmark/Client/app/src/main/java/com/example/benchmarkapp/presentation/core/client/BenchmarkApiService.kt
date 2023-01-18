@@ -18,7 +18,7 @@ class BenchmarkApiService {
     private val client: OkHttpClient = OkHttpClient()
 
     fun postData(benchmarkResults: List<BenchmarkResult>) {
-        val endpoint = "http://192.168.1.2:5000/benchmark"
+        val endpoint = "http://192.168.100.7:5000/benchmark"
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val content = toJsonArray(benchmarkResults);
         val formBody: RequestBody = content.toString().toRequestBody(mediaType)

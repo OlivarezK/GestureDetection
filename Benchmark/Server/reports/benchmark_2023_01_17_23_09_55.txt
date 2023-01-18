@@ -1,0 +1,72 @@
+[
+  {
+    "modelName": "Convolutional Model",
+    "detection": [
+      {
+        "filename": "Eat_1_n_n",
+        "responseTimeMs": 105,
+        "prediction": "EatFood"
+      },
+      {
+        "filename": "Drink_1_n_n",
+        "responseTimeMs": 9,
+        "prediction": "DrinkWater"
+      },
+      {
+        "filename": "Help_1_n_n",
+        "responseTimeMs": 9,
+        "prediction": "Help"
+      },
+      {
+        "filename": "No_1_n_n",
+        "responseTimeMs": 8,
+        "prediction": "No"
+      },
+      {
+        "filename": "Toilet_1_n_n",
+        "responseTimeMs": 9,
+        "prediction": "Toilet"
+      },
+      {
+        "filename": "Yes_1_n_n",
+        "responseTimeMs": 8,
+        "prediction": "Yes"
+      }
+    ]
+  },
+  {
+    "modelName": "Recurrrent Model",
+    "detection": [
+      {
+        "filename": "Eat_1_n_n",
+        "responseTimeMs": 91,
+        "prediction": "EatFood"
+      },
+      {
+        "filename": "Drink_1_n_n",
+        "responseTimeMs": 92,
+        "prediction": "DrinkWater"
+      },
+      {
+        "filename": "Help_1_n_n",
+        "responseTimeMs": 91,
+        "prediction": "Help"
+      },
+      {
+        "filename": "No_1_n_n",
+        "responseTimeMs": 112,
+        "prediction": "No"
+      },
+      {
+        "filename": "Toilet_1_n_n",
+        "responseTimeMs": 90,
+        "prediction": "Toilet"
+      },
+      {
+        "filename": "Yes_1_n_n",
+        "responseTimeMs": 91,
+        "prediction": "Yes"
+      }
+    ]
+  }
+]
