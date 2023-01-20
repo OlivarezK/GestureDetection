@@ -1,9 +1,8 @@
+package com.speakbyhand.app.core
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.speakbyhand.app.core.GestureCode
-import com.speakbyhand.app.core.GestureData
-import com.speakbyhand.app.core.GestureDetector
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -17,7 +16,10 @@ class GestureDetectorInstrumentedTest {
 
     @Before
     fun setup() {
-        detector = GestureDetector(InstrumentationRegistry.getInstrumentation().targetContext)
+        detector = GestureDetector(
+            InstrumentationRegistry.getInstrumentation().targetContext,
+            "gesture_conv_model_n.tflite"
+        )
     }
 
     @Test

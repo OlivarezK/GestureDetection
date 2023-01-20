@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GestureData {
-    private final int AVERAGE_DATA_POINTS_COUNT = 300;
     private final List<ImuSensorReading> accReadings;
     private final List<ImuSensorReading> gyroReadings;
     private final List<Float> timeDataPoints;
 
     public GestureData(){
+        int AVERAGE_DATA_POINTS_COUNT = 300;
         accReadings = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
         gyroReadings = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
         timeDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);

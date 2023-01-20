@@ -32,10 +32,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
@@ -76,11 +74,11 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        val delimiterDetector = NewDelimiterDetector()
+        val delimiterDetector = DelimiterDetector()
         val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
         val textToSpeech = TextToSpeech(applicationContext) {}
         val gestureDataRecorder = GestureDataRecorder(this)
-        val gestureDetector = GestureDetector(this)
+        val gestureDetector = GestureDetector(this, "gesture_conv_model_n.tflite")
         val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
 
         swipeDetector = android.view.GestureDetector(this)
@@ -486,4 +484,15 @@ fun Timer(
             )
         }
     }
+}
+
+@Composable
+fun ShowText(text: String, fontSize: TextUnit) {
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colors.primary,
+        text = text,
+        fontSize = fontSize
+    )
 }

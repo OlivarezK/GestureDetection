@@ -11,31 +11,29 @@ import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 
 
-class GestureDetector(var context: Context) {
+class GestureDetector(var context: Context, private val model_file_name: String) {
 
     fun detect(data: GestureData): GestureCode {
-        Log.i("Data Count: ", data.count.toString())
         val interpreter = Interpreter(readModelFile())
+
         val input = TensorBuffer.createFixedSize(intArrayOf(1, 297, 6), DataType.FLOAT32)
         val output = TensorBuffer.createFixedSize(intArrayOf(1, 6), DataType.FLOAT32)
-        println(data.count)
         input.loadArray(data.toArray())
+
         interpreter.run(input.buffer, output.buffer);
 
-        if(arePredictionsAboveConfidenceLevel(output.floatArray)){
+        return if(arePredictionsAboveConfidenceLevel(output.floatArray)){
             val predictionIndex = getArgMax(output.floatArray)
-            Log.i("result", output.floatArray[predictionIndex].toString())
-
-            return toGestureCode(predictionIndex)
+            toGestureCode(predictionIndex)
         } else {
-            return GestureCode.Unknown;
+            GestureCode.Unknown;
         }
     }
 
-    fun readModelFile() : ByteBuffer {
-        val fileDescriptor: AssetFileDescriptor = context.assets.openFd("gesture_conv_model_n.tflite")
+    private fun readModelFile() : ByteBuffer {
+        val fileDescriptor: AssetFileDescriptor = context.assets.openFd(model_file_name)
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-        val fileChannel: FileChannel = inputStream.getChannel()
+        val fileChannel: FileChannel = inputStream.channel
         val startOffset = fileDescriptor.startOffset
         val declareLength = fileDescriptor.declaredLength
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declareLength)
@@ -47,11 +45,9 @@ class GestureDetector(var context: Context) {
                 return true;
             }
         }
-
         return false;
     }
 
-    // TODO: Create unit test for this method
     private fun getArgMax(floatArray: FloatArray): Int {
         var maxIndex = 0
         for (i in floatArray.indices) {
@@ -62,7 +58,6 @@ class GestureDetector(var context: Context) {
         return maxIndex
     }
 
-    // TODO: Create unit test for this method
     private fun toGestureCode(predictionIndex: Int): GestureCode {
         when (predictionIndex) {
             0 -> return GestureCode.DrinkWater
@@ -71,7 +66,6 @@ class GestureDetector(var context: Context) {
             3 -> return GestureCode.No
             4 -> return GestureCode.Toilet
             5 -> return GestureCode.Yes
-//            6 -> return GestureCode.Unknown
         }
         throw IllegalArgumentException("Given argument: $predictionIndex")
     }

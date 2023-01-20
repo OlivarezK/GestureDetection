@@ -1,25 +1,23 @@
 package com.speakbyhand.app.core;
 
-import androidx.annotation.NonNull;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class LimitedStack<T> implements Iterable<T > {
+public class LimitedDeque<T> {
     List<T> items;
     private int count;
     private final int maxCount;
     private int topIndex;
     private int bottomIndex;
 
-    public LimitedStack(int maxCount) {
+    public LimitedDeque(int maxCount) {
         items = new ArrayList<>(maxCount);
         for (int i = 0; i < maxCount; i++) {
             items.add(null);
         }
         this.maxCount = maxCount;
-        topIndex = 0;
+        topIndex = -1;
         bottomIndex = 0;
         count = 0;
     }
@@ -34,10 +32,9 @@ public class LimitedStack<T> implements Iterable<T > {
     }
 
 
-
     public void push(T item) {
-        items.set(topIndex, item);
         topIndex = getNextIndex(topIndex);
+        items.set(topIndex, item);
 
         if(isFull()){
             bottomIndex = getNextIndex(bottomIndex);
@@ -70,7 +67,6 @@ public class LimitedStack<T> implements Iterable<T > {
     private int getNextIndex(int index) {
         int nextIndex = index + 1;
         if (nextIndex >= maxCount) {
-
             nextIndex = 0;
         }
         return nextIndex;
@@ -84,6 +80,14 @@ public class LimitedStack<T> implements Iterable<T > {
         return previousIndex;
     }
 
+    private int getVirtualIndex(int index){
+        if (index >= bottomIndex){
+            return  index - bottomIndex;
+        } else {
+            return maxCount - bottomIndex + index + 1;
+        }
+    }
+
     public boolean isFull() {
         return count == maxCount;
     }
@@ -92,24 +96,49 @@ public class LimitedStack<T> implements Iterable<T > {
         return count == 0;
     }
 
-    @NonNull
-    @Override
-    public Iterator<T> iterator() {
-        return new DelimiterDetectorIterator();
+    public Iterator<T> getForwardIterator() {
+        return new ForwardIterator();
     }
 
-    class DelimiterDetectorIterator implements  Iterator<T>{
+    public Iterator<T> getBackwardIterator() {
+        return new BackwardIterator();
+    }
+
+
+
+
+    class ForwardIterator implements  Iterator<T>{
         int currentIndex = bottomIndex;
+        int iterationCount = 0;
 
         @Override
         public boolean hasNext() {
-            return getNextIndex(currentIndex) != topIndex;
+            return iterationCount < maxCount;
         }
 
         @Override
         public T next() {
             T top = items.get(currentIndex);
             currentIndex = getNextIndex(currentIndex);
+            iterationCount++;
+            return top;
+        }
+    }
+
+    class BackwardIterator implements  Iterator<T>{
+        int currentIndex = topIndex;
+        int iterationCount = 0;
+
+        @Override
+        public boolean hasNext() {
+            return iterationCount < maxCount;
+        }
+
+        @Override
+        public T next() {
+            T top = items.get(currentIndex);
+            currentIndex = getPreviousIndex(currentIndex);
+            iterationCount++;
             return top;
         }
     }

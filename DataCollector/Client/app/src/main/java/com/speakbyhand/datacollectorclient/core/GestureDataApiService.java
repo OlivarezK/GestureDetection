@@ -26,7 +26,7 @@ public class GestureDataApiService {
                 .add("fileNum", String.valueOf(fileNum))
                 .build();
         Request request = new Request.Builder()
-                .url("http:/192.168.100.7:5000/post")
+                .url("http://192.168.170.185:5000/post")
                 .post(formBody)
                 .build();
 
