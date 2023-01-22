@@ -42,7 +42,6 @@ import com.speakbyhand.app.core.*
 import com.speakbyhand.app.presentation.theme.SpeakByHandTheme
 import kotlinx.coroutines.delay
 import kotlin.concurrent.thread
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
@@ -59,18 +58,11 @@ enum class AppMode{
     ButtonMode
 }
 
-class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGestureListener {
-
-    // Declaring gesture detector, swipe threshold, and swipe velocity threshold
-    private lateinit var swipeDetector: android.view.GestureDetector
-    private val swipeThreshold = 100
-    private val swipeVelocityThreshold = 100
-    private var isSwiped = false
+class MainActivity : ComponentActivity() {
+    private val swipeDetector = SwipeDetector()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Logic
         super.onCreate(savedInstanceState)
-
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
@@ -79,15 +71,12 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
         val textToSpeech = TextToSpeech(applicationContext) {}
         val gestureDataRecorder = GestureDataRecorder(this)
         val gestureDetector = GestureDetector(this, "gesture_conv_model_n.tflite")
-        val gestureToPhrase = GestureCodeToPhraseConverter(textToSpeech)
 
-        swipeDetector = android.view.GestureDetector(this)
-
-        // UI
         setContent {
             var currentState by rememberSaveable { mutableStateOf(AppState.WaitingDelimiter) }
             var mode by rememberSaveable { mutableStateOf(AppMode.ShakeMode) }
             var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Sample) }
+
             SpeakByHandTheme {
                 Column(
                     modifier = Modifier
@@ -110,10 +99,10 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
                                 delimiterDetector.stop()
                             },
                             detectSwipe = {
-                                isSwiped
+                                swipeDetector.isSwiped
                             },
                             onModeChanged = {
-                                isSwiped = false
+                                swipeDetector.isSwiped = false
                                 currentState = AppState.ButtonMode
                                 mode = AppMode.ButtonMode
                             },
@@ -124,10 +113,10 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
                                 currentState = AppState.PerformingGesture
                             },
                             detectSwipe = {
-                                isSwiped
+                                swipeDetector.isSwiped
                             },
                             onModeChanged = {
-                                isSwiped = false
+                                swipeDetector.isSwiped = false
                                 currentState = AppState.WaitingDelimiter
                                 mode = AppMode.ShakeMode
                             },
@@ -154,13 +143,10 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
                                 gestureDataRecorder.stop()
                             },
                             vibrator = vibrator
-//                            detectPause = {
-//                                gestureDataRecorder.isPaused()
-//                            }
                         )
                         AppState.SpeakingPhrase -> SpeakingPhrase(
                             textToSpeech = textToSpeech,
-                            phrase = gestureToPhrase.toMappedPhrase(detectedGestureCode),
+                            phrase = MappedPhrases.fromGestureCode(detectedGestureCode),
                             gesture = detectedGestureCode,
                             onFinish = {
                                 currentState = when(mode){
@@ -184,55 +170,13 @@ class MainActivity : ComponentActivity(), android.view.GestureDetector.OnGesture
         }
     }
 
-    // Override this method to recognize touch event
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        return if (swipeDetector.onTouchEvent(event)) {
+        return if (swipeDetector.gestureDetector.onTouchEvent(event)) {
             true
         }
         else {
             super.onTouchEvent(event)
         }
-    }
-
-    // All the below methods are GestureDetector.OnGestureListener members
-    override fun onDown(e: MotionEvent?): Boolean {
-        return false
-    }
-
-    override fun onShowPress(e: MotionEvent?) {
-        return
-    }
-
-    override fun onSingleTapUp(e: MotionEvent?): Boolean {
-        return false
-    }
-
-    override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-        return false
-    }
-
-    override fun onLongPress(e: MotionEvent?) {
-        return
-    }
-
-    override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-        try {
-            val diffY = e2.y - e1.y
-            val diffX = e2.x - e1.x
-            if (abs(diffX) < abs(diffY)) {
-                if (abs(diffY) > swipeThreshold && abs(velocityY) > swipeVelocityThreshold) {
-                    isSwiped = true
-//                    if (diffX > 0) {
-//                        //Toast.makeText(applicationContext, "Switched mode", Toast.LENGTH_SHORT).show()
-//                        isSwiped = true
-//                    }
-                }
-            }
-        }
-        catch (exception: Exception) {
-            exception.printStackTrace()
-        }
-        return true
     }
 }
 
@@ -249,21 +193,15 @@ fun WaitingDelimiter(
     // Logic
     onStart()
     thread {
-        // Disabled for testing
         do {
             val isDelimiterDetected = detectDelimiter()
             val isSwitched = detectSwipe()
         } while (!isDelimiterDetected && !isSwitched)
 
-//        detectDelimiter()
-//        Thread.sleep(5000)
-
         if (detectSwipe()){
             onModeChanged()
         }else{
             onDelimiterDetected()
-
-            //val mVibratePattern = longArrayOf(0, 500, 500, 500)
             val effect = VibrationEffect.createOneShot(500, -1)
             vibrator.vibrate(effect)
         }
@@ -320,24 +258,11 @@ fun PerformingGesture(
     onGestureNotDetected: () -> Unit,
     onFinish: () -> Unit,
     vibrator: Vibrator
-//    detectPause: () -> Boolean
 ) {
     // Logic
-//    val startTime = System.currentTimeMillis();
-//    do {
-//        val currentTime = System.currentTimeMillis()
-//    } while (currentTime - startTime < 1200)
-
     onStart()
-
-    val countDownTimer = object : CountDownTimer(3000, 10) {
+    object : CountDownTimer(3000, 10) {
         override fun onTick(millisUntilFinished: Long) {
-//            val gestureDone = detectPause()
-//            if (gestureDone){
-//                cancel()
-//                this.onFinish()
-//                Log.i("Status", "Cancelled")
-//            }
         }
 
         override fun onFinish() {
@@ -355,9 +280,7 @@ fun PerformingGesture(
 
             onFinish()
         }
-    }
-
-    countDownTimer.start()
+    }.start()
 
     // UI
     Timer(
@@ -373,26 +296,24 @@ fun SpeakingPhrase(textToSpeech: TextToSpeech, phrase: String, onFinish: () -> U
     // Logic
     textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener(){
         override fun onStart(p0: String?) {
-
         }
 
         override fun onDone(p0: String?) {
             onFinish()
         }
 
+        @Deprecated("On error is Deprecated")
         override fun onError(p0: String?) {
-
         }
     })
     textToSpeech.speak(phrase, TextToSpeech.QUEUE_FLUSH, null, "123")
 
-
     // UI
-    gestureDisplay(gesture)
+    GestureDisplay(gesture)
 }
 
 @Composable
-fun gestureDisplay(gesture: GestureCode){
+fun GestureDisplay(gesture: GestureCode){
     Image(
         painterResource(
             when(gesture){

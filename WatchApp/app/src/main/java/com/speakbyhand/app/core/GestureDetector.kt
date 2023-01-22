@@ -2,7 +2,6 @@ package com.speakbyhand.app.core
 
 import android.content.Context
 import android.content.res.AssetFileDescriptor
-import android.util.Log
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
@@ -20,13 +19,13 @@ class GestureDetector(var context: Context, private val model_file_name: String)
         val output = TensorBuffer.createFixedSize(intArrayOf(1, 6), DataType.FLOAT32)
         input.loadArray(data.toArray())
 
-        interpreter.run(input.buffer, output.buffer);
+        interpreter.run(input.buffer, output.buffer)
 
-        return if(arePredictionsAboveConfidenceLevel(output.floatArray)){
+        return if(arePredictionsAboveConfidenceThreshold(output.floatArray)){
             val predictionIndex = getArgMax(output.floatArray)
             toGestureCode(predictionIndex)
         } else {
-            GestureCode.Unknown;
+            GestureCode.Unknown
         }
     }
 
@@ -39,13 +38,14 @@ class GestureDetector(var context: Context, private val model_file_name: String)
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declareLength)
     }
 
-    private fun arePredictionsAboveConfidenceLevel(floatArray: FloatArray) : Boolean{
+    private fun arePredictionsAboveConfidenceThreshold(floatArray: FloatArray) : Boolean{
         for (i in floatArray.indices) {
-            if (floatArray[i] > .6f) {
-                return true;
+            val confidenceThreshold = .6f
+            if (floatArray[i] > confidenceThreshold) {
+                return true
             }
         }
-        return false;
+        return false
     }
 
     private fun getArgMax(floatArray: FloatArray): Int {

@@ -1,15 +1,7 @@
 package com.speakbyhand.app.core;
 
-import android.speech.tts.TextToSpeech;
-
-public class GestureCodeToPhraseConverter {
-    TextToSpeech textToSpeech;
-
-    public GestureCodeToPhraseConverter(TextToSpeech textToSpeech) {
-        this.textToSpeech = textToSpeech;
-    }
-
-    public String toMappedPhrase(GestureCode gestureCode){
+public class MappedPhrases {
+    public static String fromGestureCode(GestureCode gestureCode){
         switch (gestureCode){
             case Sample:
                 return "Sample";

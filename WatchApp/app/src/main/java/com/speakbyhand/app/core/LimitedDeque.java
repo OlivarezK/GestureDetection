@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class LimitedDeque<T> {
-    List<T> items;
+    private List<T> items;
     private int count;
     private final int maxCount;
     private int topIndex;

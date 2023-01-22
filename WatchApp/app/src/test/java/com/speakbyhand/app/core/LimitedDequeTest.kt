@@ -2,12 +2,11 @@ package com.speakbyhand.app.core
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.*
 import java.util.function.Consumer
 
 class LimitedDequeTest {
     @Test
-    fun tesTopReturnsLatestAddedItem() {
+    fun testTopReturnsLatestAddedItem() {
         val stack = LimitedDeque<Int>(4)
         stack.push(1)
         Assertions.assertEquals(1, stack.top())
