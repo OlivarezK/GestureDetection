@@ -15,7 +15,7 @@ public class GestureDataReader {
 
     public void readGestureData(Context context, String filename){
         try {
-            InputStream is = context.getAssets().open(filename);
+            InputStream is = context.getAssets().open("TestData/"+filename);
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(is, Charset.forName("UTF-8"))
             );

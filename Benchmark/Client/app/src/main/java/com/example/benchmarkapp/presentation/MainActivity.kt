@@ -7,6 +7,7 @@
 package com.example.benchmarkapp.presentation
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
@@ -30,6 +32,7 @@ import com.example.benchmarkapp.presentation.core.TimeRecorder
 import com.example.benchmarkapp.presentation.core.client.BenchmarkApiService
 import com.example.benchmarkapp.presentation.core.client.BenchmarkResult
 import com.example.benchmarkapp.presentation.theme.BenchmarkAppTheme
+import kotlin.concurrent.thread
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,38 +47,43 @@ class MainActivity : ComponentActivity() {
         val gestureDataReader = GestureDataReader()
         val timeRecorder = TimeRecorder()
         val apiService = BenchmarkApiService()
+        val assetManager: AssetManager = assets
 
         val modelNames = arrayOf("Convolutional Model", "Recurrrent Model")
         val modelFilePaths = arrayOf("gesture_conv_model_n.tflite", "gesture_recurr_model_n.tflite")
-        val dataFileNames = arrayOf("Eat_1_n_n", "Drink_1_n_n", "Help_1_n_n", "No_1_n_n", "Toilet_1_n_n", "Yes_1_n_n")
+        val dataFileNames: Array<out String>? = assetManager.list("TestData")
 
         val benchmarkResults = modelNames.zip(modelFilePaths).map { (modelName, modelPath) ->
             val gestureDetector = GestureDetector(context, modelPath)
             val benchmarkResult = BenchmarkResult(modelName)
-            for (filename in dataFileNames) {
-                // read data
-                gestureDataReader.readGestureData(context, filename)
-                val gestureData = gestureDataReader.data
+            if (dataFileNames != null) {
+                for (filename in dataFileNames) {
+                    // read data
+                    gestureDataReader.readGestureData(context, filename)
+                    val gestureData = gestureDataReader.data
 
-                // feed data and run model
-                timeRecorder.startTimer()
-                val detection = gestureDetector.detect(gestureData)
-                val inferenceTime = timeRecorder.stopTimer()
+                    // feed data and run model
+                    timeRecorder.startTimer()
+                    val detection = gestureDetector.detect(gestureData)
+                    val inferenceTime = timeRecorder.stopTimer()
 
-                // prediction
-                Log.i("File Name", filename)
-                Log.i("Inference Time", inferenceTime.toString())
-                Log.i("Prediction", detection.toString())
-                benchmarkResult.add(filename, inferenceTime, detection)
+                    // prediction
+                    Log.i("Num", dataFileNames.size.toString())
+                    Log.i("File Name", filename)
+                    Log.i("Inference Time", inferenceTime.toString())
+                    Log.i("Prediction", detection.toString())
+                    benchmarkResult.add(filename, inferenceTime, detection)
 
-                gestureDataReader.reset()
+                    gestureDataReader.reset()
+                }
             }
             benchmarkResult
         }
 
         apiService.postData(benchmarkResults)
-        Toast.makeText(context, "Benchmark Complete", Toast.LENGTH_SHORT).show()
-
+        runOnUiThread {
+            Toast.makeText(context, "Benchmark Complete", Toast.LENGTH_SHORT).show()
+        }
     }
 }
 
@@ -100,9 +108,12 @@ fun WearApp(onStart: () -> Unit) {
                 onClick = {
                     currentState.value = RUNNING_MODEL_STATE
                     prompt = RUNNING_MODEL_STATE
-                    onStart()
-                    currentState.value = IDLE_STATE
-                    prompt = IDLE_STATE
+                    thread {
+                        onStart()
+
+                        currentState.value = IDLE_STATE
+                        prompt = IDLE_STATE
+                    }
                 }
             ) {
                 Text(text = "Start")
