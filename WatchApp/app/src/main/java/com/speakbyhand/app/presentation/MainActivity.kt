@@ -13,6 +13,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.util.Log
 import android.view.MotionEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -142,7 +143,10 @@ class MainActivity : ComponentActivity() {
                                 gestureDataRecorder.reset()
                                 gestureDataRecorder.stop()
                             },
-                            vibrator = vibrator
+                            vibrator = vibrator,
+                            detectPause = {
+                                gestureDataRecorder.isPaused
+                            }
                         )
                         AppState.SpeakingPhrase -> SpeakingPhrase(
                             textToSpeech = textToSpeech,
@@ -156,13 +160,13 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                         AppState.UnknownGesture -> UnknownGesture(
-                            vibrator = vibrator,
                             onFinish = {
                                 currentState = when(mode){
                                     AppMode.ShakeMode -> AppState.WaitingDelimiter
                                     AppMode.ButtonMode -> AppState.ButtonMode
                                 }
-                            }
+                            },
+                            textToSpeech = textToSpeech
                         )
                     }
                 }
@@ -201,9 +205,15 @@ fun WaitingDelimiter(
         if (detectSwipe()){
             onModeChanged()
         }else{
-            onDelimiterDetected()
             val effect = VibrationEffect.createOneShot(500, -1)
             vibrator.vibrate(effect)
+
+            val startTime = System.currentTimeMillis()
+            do{
+                val currentTime = System.currentTimeMillis()
+            }while (currentTime - startTime < 500)
+
+            onDelimiterDetected()
         }
 
         onFinish()
@@ -233,8 +243,8 @@ fun ButtonMode(
     //UI
     Column(
         modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colors.background),
+            .fillMaxSize()
+            .background(MaterialTheme.colors.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -257,21 +267,34 @@ fun PerformingGesture(
     onGestureDetected: (GestureCode) -> Unit,
     onGestureNotDetected: () -> Unit,
     onFinish: () -> Unit,
-    vibrator: Vibrator
+    vibrator: Vibrator,
+    detectPause: () -> Boolean
 ) {
     // Logic
     onStart()
+    var moved = false
+
     object : CountDownTimer(3000, 10) {
         override fun onTick(millisUntilFinished: Long) {
+            val notMoving = detectPause()
+
+            if(!notMoving){
+                moved = true
+            }
         }
 
         override fun onFinish() {
-            val detection = detectGestureCode()
-            val hasDetectedGesture = detection.first
-            val detectedGestureCode = detection.second
-            if (hasDetectedGesture) {
-                onGestureDetected(detectedGestureCode)
-            } else {
+            if (moved){
+                val detection = detectGestureCode()
+                val hasDetectedGesture = detection.first
+                val detectedGestureCode = detection.second
+
+                if (hasDetectedGesture) {
+                    onGestureDetected(detectedGestureCode)
+                } else {
+                    onGestureNotDetected()
+                }
+            }else{
                 onGestureNotDetected()
             }
 
@@ -335,21 +358,33 @@ fun GestureDisplay(gesture: GestureCode){
 }
 
 @Composable
-fun UnknownGesture(vibrator: Vibrator, onFinish: () -> Unit) {
+fun UnknownGesture(onFinish: () -> Unit, textToSpeech: TextToSpeech) {
     // Logic
-    val mVibratePattern = longArrayOf(0, 500, 500, 500)
-    val effect = VibrationEffect.createWaveform(mVibratePattern, -1)
-    vibrator.vibrate(effect)
-    object : CountDownTimer(3000, 500) {
-        override fun onTick(millisUntilFinished: Long) {}
-        override fun onFinish() {
+    textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener(){
+        override fun onStart(p0: String?) {
+        }
+
+        override fun onDone(p0: String?) {
             onFinish()
         }
-    }.start()
+
+        @Deprecated("On error is Deprecated")
+        override fun onError(p0: String?) {
+        }
+    })
+    textToSpeech.speak("Gesture not recognized", TextToSpeech.QUEUE_FLUSH, null, "123")
 
     // UI
-    ShowText(stringResource(R.string.unknown), fontSize = 25.sp)
-    ShowText(stringResource(R.string.question_mark), fontSize = 40.sp)
+    Image(
+        painterResource(
+            R.drawable.unknown
+        ),
+        contentDescription = null,
+        modifier = Modifier
+            .fillMaxWidth()
+            .requiredSize(100.dp),
+        alignment = Alignment.Center
+    )
 }
 
 

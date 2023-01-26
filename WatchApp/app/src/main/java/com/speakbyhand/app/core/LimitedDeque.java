@@ -48,7 +48,7 @@ public class LimitedDeque<T> {
         for (int i = 0; i < maxCount; i++) {
             items.add(null);
         }
-        topIndex = 0;
+        topIndex = -1;
         bottomIndex = 0;
         count = 0;
     }

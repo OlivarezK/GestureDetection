@@ -18,7 +18,7 @@ public class MappedPhrases {
             case No:
                 return "No";
             case Unknown:
-                return "";
+                return "Gesture not recognized";
         }
         return "";
 
