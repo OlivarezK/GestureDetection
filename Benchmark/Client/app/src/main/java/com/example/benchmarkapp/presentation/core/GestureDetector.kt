@@ -15,7 +15,7 @@ class GestureDetector(var context: Context, private val modelFilePath: String) {
     fun detect(data: GestureData): GestureCode {
         val interpreter = Interpreter(readModelFile())
 
-        val input = TensorBuffer.createFixedSize(intArrayOf(1, 297, 6), DataType.FLOAT32)
+        val input = TensorBuffer.createFixedSize(intArrayOf(1, 197, 6), DataType.FLOAT32)
         val output = TensorBuffer.createFixedSize(intArrayOf(1, 6), DataType.FLOAT32)
         input.loadArray(data.toArray())
 
