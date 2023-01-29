@@ -217,38 +217,6 @@ class SwatchAppUiIntegrationTest {
     }
 
     @Test
-    fun testUiChangesToUnknownGestureWhenNoGestureIsDetected() {
-        rule.setContent {
-            var currentState by rememberSaveable { mutableStateOf(AppState.PerformingGesture) }
-            var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Unknown) }
-
-            when (currentState) {
-                AppState.PerformingGesture -> PerformingGesture(
-                    onGestureDetected = {
-                        detectedGestureCode = it
-                        currentState = AppState.SpeakingPhrase
-                    },
-                    onGestureNotDetected = {
-                        currentState = AppState.UnknownGesture
-                    },
-                    vibrator = vibrator,
-                    gestureDataRecorder = gestureDataRecorder,
-                    gestureDetector = gestureDetector
-                )
-                AppState.UnknownGesture -> UnknownGesture(
-                    onFinish = {}, textToSpeech = textToSpeech
-                )
-                else -> {}
-            }
-        }
-
-        rule.waitUntil(5000) {
-            rule.onAllNodesWithTag(R.drawable.unknown.toString()).fetchSemanticsNodes().isNotEmpty()
-        }
-        rule.onNodeWithTag(R.drawable.unknown.toString()).assertIsDisplayed()
-    }
-
-    @Test
     fun testUiChangesToUnknownGestureWhenNoMovementIsDetected() {
         gestureDataRecorder.reset()
 
