@@ -40,7 +40,7 @@ class GestureDetector(var context: Context, private val model_file_name: String)
 
     private fun arePredictionsAboveConfidenceThreshold(floatArray: FloatArray) : Boolean{
         for (i in floatArray.indices) {
-            val confidenceThreshold = .6f
+            val confidenceThreshold = .7f
             if (floatArray[i] > confidenceThreshold) {
                 return true
             }

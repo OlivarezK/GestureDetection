@@ -32,7 +32,7 @@ class SwatchAppUiIntegrationTest {
     private val vibrator = context.getSystemService(ComponentActivity.VIBRATOR_SERVICE) as Vibrator
     private val textToSpeech = TextToSpeech(context) {}
     private val gestureDataRecorder = GestureDataRecorder(context)
-    private val gestureDetector = GestureDetector(context, "gesture_conv_model_n.tflite")
+    private val gestureDetector = GestureDetector(context, "gesture_conv_model_nv2.tflite")
 
     // Waiting Delimiter State Test
     @Test
@@ -540,6 +540,44 @@ class SwatchAppUiIntegrationTest {
 
     @Test
     fun testNotRecognizedIsOutputWhenUnknownGestureIsPerformed() {
+        val fileName = "/Unknown_1"
+        val expectedImage = R.drawable.unknown
+
+        rule.setContent {
+            var currentState by rememberSaveable { mutableStateOf(AppState.PerformingGesture) }
+            var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Unknown) }
+
+            when (currentState) {
+                AppState.PerformingGesture -> PerformingGesture(
+                    vibrator = vibrator,
+                    gestureDataRecorder = gestureDataRecorder,
+                    gestureDetector = gestureDetector,
+                    onGestureDetected = {
+                        detectedGestureCode = it
+                        currentState = AppState.SpeakingPhrase
+                    },
+                    onGestureNotDetected = {
+                        currentState = AppState.UnknownGesture
+                    }
+                )
+                AppState.SpeakingPhrase -> SpeakingPhrase(
+                    textToSpeech = textToSpeech,
+                    phrase = MappedPhrases.fromGestureCode(detectedGestureCode),
+                    gesture = detectedGestureCode,
+                    onFinish = {}
+                )
+                else -> {}
+            }
+
+            gestureDataRecorder.stop()
+            gestureDataRecorder.reset()
+            gestureDataRecorder.gestureData = GestureData(loadResourceAsString(fileName))
+        }
+
+        rule.waitUntil(5000) {
+            rule.onAllNodesWithTag(expectedImage.toString()).fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onNodeWithTag(expectedImage.toString()).assertIsDisplayed()
     }
 
     @Test
