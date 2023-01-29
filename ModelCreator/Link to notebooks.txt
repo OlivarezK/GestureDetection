@@ -1,0 +1,11 @@
+1st Iteration:
+https://colab.research.google.com/drive/1nkhvaGpneg6ry6cKHaIFkINOflpnxZK1?usp=sharing
+
+2nd Iteration:
+https://colab.research.google.com/drive/1VupIo0y3guG-aOb1jCeoxDBbeviNf-L9?usp=sharing
+
+2nd Iteration_f:
+https://colab.research.google.com/drive/1NqQhGqkXYjtb8Wyq5-La_g0jBlb0LV_M?usp=sharing
+
+3rd Iteration:
+https://colab.research.google.com/drive/1DWMaxPYDLg6IkmimCv403JGmW4ZtKCyR?usp=sharing
