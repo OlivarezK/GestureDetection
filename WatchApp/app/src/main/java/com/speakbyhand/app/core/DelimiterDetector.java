@@ -27,7 +27,7 @@ public class DelimiterDetector  {
         };
     }
 
-    public boolean start() {
+    public boolean start(SensorManager sensorManager) {
         return start(sensorManager, SensorManager.SENSOR_DELAY_FASTEST);
     }
 

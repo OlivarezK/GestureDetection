@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
         val vibrator = getSystemService(ComponentActivity.VIBRATOR_SERVICE) as Vibrator
         val textToSpeech = TextToSpeech(applicationContext) {}
         val gestureDataRecorder = GestureDataRecorder(this)
-        val gestureDetector = GestureDetector(this, "gesture_conv_model_n.tflite")
+        val gestureDetector = GestureDetector(this, "gesture_conv_model_nv2.tflite")
 
 
         setContent {
@@ -80,6 +80,7 @@ class MainActivity : ComponentActivity() {
                     textToSpeech,
                     gestureDataRecorder,
                     gestureDetector,
+                    sensorManager
                 )
             }
         }
@@ -96,6 +97,7 @@ fun WatchApp(
     textToSpeech: TextToSpeech,
     gestureDataRecorder: GestureDataRecorder,
     gestureDetector: GestureDetector,
+    sensorManager: SensorManager,
     initialState: AppState = AppState.WaitingDelimiter
 ) {
     var currentState by rememberSaveable { mutableStateOf(initialState) }
@@ -106,6 +108,7 @@ fun WatchApp(
         AppState.WaitingDelimiter -> WaitingTrigger(
             delimiterDetector = delimiterDetector,
             vibrator = vibrator,
+            sensorManager = sensorManager,
             onTrigger = {
                 currentState = AppState.PerformingGesture
             },
@@ -149,6 +152,7 @@ fun WatchApp(
 fun WaitingTrigger(
     delimiterDetector: DelimiterDetector,
     vibrator: Vibrator,
+    sensorManager: SensorManager,
     onTrigger: () -> Unit,
     swipeState: SwipeableState<TriggerMode> = rememberSwipeableState(TriggerMode.ShakeMode)
 ) {
@@ -172,7 +176,7 @@ fun WaitingTrigger(
         when (swipeState.currentValue) {
             TriggerMode.ShakeMode -> ShakeMode(
                 onStart = {
-                    delimiterDetector.start()
+                    delimiterDetector.start(sensorManager)
                 },
                 detectDelimiter = {
                     delimiterDetector.isDelimiterDetected
