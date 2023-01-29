@@ -35,10 +35,6 @@ class SwipeDetector {
                 if (abs(diffX) < abs(diffY)) {
                     if (abs(diffY) > swipeThreshold && abs(velocityY) > swipeVelocityThreshold) {
                         isSwiped = true
-//                    if (diffX > 0) {
-//                        //Toast.makeText(applicationContext, "Switched mode", Toast.LENGTH_SHORT).show()
-//                        isSwiped = true
-//                    }
                     }
                 }
             }

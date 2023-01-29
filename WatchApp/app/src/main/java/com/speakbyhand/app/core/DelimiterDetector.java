@@ -9,9 +9,11 @@ public class DelimiterDetector  {
     private SensorManager sensorManager;
     private Sensor linearSensor;
     private final SensorEventListener eventListener;
-    private final ShakeDetector shakeDetector = new ShakeDetector(15, 80, 50);
+    private final ShakeDetector shakeDetector;
 
-    public DelimiterDetector() {
+    public DelimiterDetector(ShakeDetector shakeDetector, SensorManager sensorManager) {
+        this.shakeDetector = shakeDetector;
+        this.sensorManager = sensorManager;
         eventListener = new SensorEventListener() {
             @Override public void onSensorChanged(SensorEvent event) {
                 float x = event.values[0];
@@ -25,7 +27,7 @@ public class DelimiterDetector  {
         };
     }
 
-    public boolean start(SensorManager sensorManager) {
+    public boolean start() {
         return start(sensorManager, SensorManager.SENSOR_DELAY_FASTEST);
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class GestureDataRecorder {
     private long startMilli;
-    private GestureData gestureData = new GestureData();
+    public GestureData gestureData = new GestureData();
     private PauseDetector pauseDetector = new PauseDetector();
     private final SensorManager accManager, gyroManager, linearManager;
     private final Sensor accSensor, gyroSensor, linearSensor;

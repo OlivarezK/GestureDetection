@@ -1,6 +1,6 @@
 package com.speakbyhand.app.core;
 
-class ShakeDetector {
+public class ShakeDetector {
     final int shakeThreshold;
     final float accelerationThreshold;
     final int windowSize;
