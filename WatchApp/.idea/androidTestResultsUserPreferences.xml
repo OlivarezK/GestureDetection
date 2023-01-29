@@ -159,6 +159,21 @@
             </AndroidTestResultsTableState>
           </value>
         </entry>
+        <entry key="-118197139">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="Wear_OS_Large_Round_API_30" value="120" />
+                  <entry key="adb-RFAT32HH5AH-fYU8Kk._adb-tls-connect._tcp" value="120" />
+                  <entry key="samsung&#10; SM-R860" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
         <entry key="75707053">
           <value>
             <AndroidTestResultsTableState>
@@ -193,6 +208,20 @@
                   <entry key="Duration" value="90" />
                   <entry key="Tests" value="360" />
                   <entry key="Wear_OS_Small_Round_API_30" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="421391457">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RFAT32HH5AH-fYU8Kk._adb-tls-connect._tcp" value="120" />
+                  <entry key="samsung&#10; SM-R860" value="120" />
                 </map>
               </option>
             </AndroidTestResultsTableState>
@@ -245,6 +274,20 @@
                   <entry key="Duration" value="90" />
                   <entry key="Tests" value="360" />
                   <entry key="Wear_OS_Small_Round_API_30" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="1787883462">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RFAT32HH5AH-fYU8Kk._adb-tls-connect._tcp" value="120" />
+                  <entry key="samsung&#10; SM-R860" value="120" />
                 </map>
               </option>
             </AndroidTestResultsTableState>

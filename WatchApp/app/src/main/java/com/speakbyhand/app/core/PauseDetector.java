@@ -30,7 +30,6 @@ class PauseDetector {
     }
 
     public boolean isPaused(){
-        Log.i("pausecount", String.valueOf(pauseCount));
         return pauseCount > pauseThreshold;
     }
 }

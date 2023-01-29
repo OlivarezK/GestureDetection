@@ -44,6 +44,7 @@ class SwatchAppUiIntegrationTest {
                 AppState.WaitingDelimiter -> WaitingTrigger(
                     delimiterDetector = delimiterDetector,
                     vibrator = vibrator,
+                    sensorManager = sensorManager,
                     onTrigger = {
                         currentState = AppState.PerformingGesture
                     },
@@ -81,6 +82,7 @@ class SwatchAppUiIntegrationTest {
                 AppState.WaitingDelimiter -> WaitingTrigger(
                     delimiterDetector = delimiterDetector,
                     vibrator = vibrator,
+                    sensorManager = sensorManager,
                     onTrigger = {
                         currentState = AppState.PerformingGesture
                     },
@@ -110,6 +112,7 @@ class SwatchAppUiIntegrationTest {
                 AppState.WaitingDelimiter -> WaitingTrigger(
                     delimiterDetector = delimiterDetector,
                     vibrator = vibrator,
+                    sensorManager = sensorManager,
                     onTrigger = {
                         currentState = AppState.PerformingGesture
                     },
@@ -145,6 +148,7 @@ class SwatchAppUiIntegrationTest {
                 AppState.WaitingDelimiter -> WaitingTrigger(
                     delimiterDetector = delimiterDetector,
                     vibrator = vibrator,
+                    sensorManager = sensorManager,
                     onTrigger = {
                         currentState = AppState.PerformingGesture
                     },
@@ -550,6 +554,7 @@ class SwatchAppUiIntegrationTest {
                     swipeState = swipeState,
                     delimiterDetector = delimiterDetector,
                     vibrator = vibrator,
+                    sensorManager = sensorManager,
                     onTrigger = {
                         currentState = AppState.PerformingGesture
                     },
@@ -586,6 +591,7 @@ class SwatchAppUiIntegrationTest {
                     swipeState = swipeState,
                     delimiterDetector = delimiterDetector,
                     vibrator = vibrator,
+                    sensorManager = sensorManager,
                     onTrigger = {
                         currentState = AppState.PerformingGesture
                     },
@@ -646,6 +652,7 @@ class SwatchAppUiIntegrationTest {
                     swipeState = swipeState,
                     delimiterDetector = delimiterDetector,
                     vibrator = vibrator,
+                    sensorManager = sensorManager,
                     onTrigger = {
                         currentState = AppState.PerformingGesture
                     },
@@ -680,6 +687,7 @@ class SwatchAppUiIntegrationTest {
                     swipeState = swipeState,
                     delimiterDetector = delimiterDetector,
                     vibrator = vibrator,
+                    sensorManager = sensorManager,
                     onTrigger = {
                         currentState = AppState.PerformingGesture
                     },
