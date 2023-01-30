@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
         val assetManager: AssetManager = assets
 
         val modelNames = arrayOf("Convolutional Model", "Recurrrent Model")
-        val modelFilePaths = arrayOf("gesture_conv_model_filtered.tflite", "gesture_recurr_model_filtered.tflite")
+        val modelFilePaths = arrayOf("gesture_conv_model_nv2.tflite")
         val dataFileNames: Array<out String>? = assetManager.list("TestData")
 
         val benchmarkResults = modelNames.zip(modelFilePaths).map { (modelName, modelPath) ->
