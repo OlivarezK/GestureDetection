@@ -16,6 +16,8 @@ import android.speech.tts.UtteranceProgressListener
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,6 +27,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -50,7 +53,7 @@ enum class AppState {
     PerformingGesture,
     SpeakingPhrase,
     UnknownGesture,
-    ButtonMode
+    Splash
 }
 
 enum class TriggerMode {
@@ -98,13 +101,18 @@ fun WatchApp(
     gestureDataRecorder: GestureDataRecorder,
     gestureDetector: GestureDetector,
     sensorManager: SensorManager,
-    initialState: AppState = AppState.WaitingDelimiter
+    initialState: AppState = AppState.Splash
 ) {
     var currentState by rememberSaveable { mutableStateOf(initialState) }
     var detectedGestureCode by rememberSaveable { mutableStateOf(GestureCode.Sample) }
     val swipeState = rememberSwipeableState(TriggerMode.ShakeMode)
 
     when (currentState) {
+        AppState.Splash -> SplashScreen(
+            onFinish = {
+                currentState = AppState.WaitingDelimiter
+            }
+        )
         AppState.WaitingDelimiter -> WaitingTrigger(
             delimiterDetector = delimiterDetector,
             vibrator = vibrator,
@@ -145,6 +153,40 @@ fun WatchApp(
         }
     }
 
+}
+
+@Composable
+fun SplashScreen(
+    onFinish: () -> Unit
+){
+    var startAnimation by remember { mutableStateOf(false) }
+    val alphaAnim = animateFloatAsState(
+        targetValue = if(startAnimation) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 1000
+        )
+    )
+
+    LaunchedEffect(key1 = true){
+        startAnimation = true
+        delay(2000)
+        onFinish()
+    }
+
+    // UI
+    Box(
+        modifier = Modifier
+            .background(Color.Black)
+            .fillMaxSize()
+            .alpha(alphaAnim.value),
+        contentAlignment = Alignment.Center
+    ){
+        Image(
+            modifier = Modifier.size(170.dp),
+            painter = painterResource(id = R.drawable.splash),
+            contentDescription = "Logo Icon"
+        )
+    }
 }
 
 @OptIn(ExperimentalWearMaterialApi::class)
