@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
         val vibrator = getSystemService(ComponentActivity.VIBRATOR_SERVICE) as Vibrator
         val textToSpeech = TextToSpeech(applicationContext) {}
         val gestureDataRecorder = GestureDataRecorder(this)
-        val gestureDetector = GestureDetector(this, "gesture_conv_model_nv2.tflite")
+        val gestureDetector = GestureDetector(this, "gesture_conv_model_n_n.tflite")
 
 
         setContent {

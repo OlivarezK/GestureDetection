@@ -2,6 +2,7 @@ package com.speakbyhand.app.core
 
 import android.content.Context
 import android.content.res.AssetFileDescriptor
+import android.util.Log
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
