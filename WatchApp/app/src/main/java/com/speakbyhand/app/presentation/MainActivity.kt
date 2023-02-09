@@ -23,6 +23,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.TabRow
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -40,11 +41,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.wear.compose.material.*
 import androidx.wear.compose.material.SwipeableDefaults.resistanceConfig
+import com.google.accompanist.pager.*
 import com.speakbyhand.app.R
 import com.speakbyhand.app.core.*
 import com.speakbyhand.app.presentation.theme.SpeakByHandTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.concurrent.thread
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
 
@@ -83,7 +88,7 @@ class MainActivity : ComponentActivity() {
                     textToSpeech,
                     gestureDataRecorder,
                     gestureDetector,
-                    sensorManager
+                    sensorManager,
                 )
             }
         }
@@ -189,7 +194,7 @@ fun SplashScreen(
     }
 }
 
-@OptIn(ExperimentalWearMaterialApi::class)
+@OptIn(ExperimentalWearMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun WaitingTrigger(
     delimiterDetector: DelimiterDetector,
@@ -199,6 +204,27 @@ fun WaitingTrigger(
     swipeState: SwipeableState<TriggerMode> = rememberSwipeableState(TriggerMode.ShakeMode)
 ) {
     val verticalAnchors = mapOf(0f to TriggerMode.ButtonMode, 1f to TriggerMode.ShakeMode)
+    val pagerSelect = rememberPagerState(pageCount = 2)
+    val scope = rememberCoroutineScope()
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(end = 5.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.End
+    ) {
+        VerticalPagerIndicator(
+            pagerState = pagerSelect,
+            activeColor = Color.hsv(261f, 0.43f, 0.80f),
+            inactiveColor = Color.LightGray
+        )
+    }
+
+    when(swipeState.currentValue){
+        TriggerMode.ShakeMode -> LaunchedEffect(key1 = true){scope.launch { pagerSelect.animateScrollToPage(0) }}
+        TriggerMode.ButtonMode -> LaunchedEffect(key1 = true){scope.launch { pagerSelect.animateScrollToPage(1) }}
+    }
 
     Box(
         modifier = Modifier
@@ -212,8 +238,6 @@ fun WaitingTrigger(
                 velocityThreshold = Dp(200F)
             ),
         contentAlignment = Alignment.CenterStart,
-
-
         ) {
         when (swipeState.currentValue) {
             TriggerMode.ShakeMode -> ShakeMode(
@@ -235,6 +259,9 @@ fun WaitingTrigger(
                 onClick = {
                     onTrigger()
                 },
+                delimiterOnFinish = {
+                    delimiterDetector.stop()
+                },
                 vibrator = vibrator
             )
             else -> Text("This is not supposed to show (2) :/")
@@ -254,6 +281,7 @@ fun ShakeMode(
 ) {
     // Logic
     onStart()
+
     thread {
         // wait for delimiter
         do {
@@ -283,13 +311,16 @@ fun ShakeMode(
 @Composable
 fun ButtonMode(
     onClick: () -> Unit,
+    delimiterOnFinish: () -> Unit,
     vibrator: Vibrator
 ) {
+    // Logic
+    delimiterOnFinish() // unregister waiting delimiters
+
     //UI
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.background),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
