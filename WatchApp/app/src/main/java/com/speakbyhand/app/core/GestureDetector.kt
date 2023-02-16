@@ -41,7 +41,7 @@ class GestureDetector(var context: Context, private val model_file_name: String)
 
     private fun arePredictionsAboveConfidenceThreshold(floatArray: FloatArray) : Boolean{
         for (i in floatArray.indices) {
-            val confidenceThreshold = .7f
+            val confidenceThreshold = .6f
             if (floatArray[i] > confidenceThreshold) {
                 return true
             }
@@ -67,6 +67,7 @@ class GestureDetector(var context: Context, private val model_file_name: String)
             3 -> return GestureCode.No
             4 -> return GestureCode.Toilet
             5 -> return GestureCode.Yes
+            6 -> return GestureCode.Unknown
         }
         throw IllegalArgumentException("Given argument: $predictionIndex")
     }

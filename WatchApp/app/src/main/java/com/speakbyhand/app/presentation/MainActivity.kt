@@ -347,26 +347,29 @@ fun PerformingGesture(
     gestureDataRecorder: GestureDataRecorder,
     gestureDetector: GestureDetector
 ) {
-    var moved = false
+//    var moved = false
     gestureDataRecorder.start()
 
     object : CountDownTimer(3000, 10) {
         override fun onTick(millisUntilFinished: Long) {
-            val notMoving = gestureDataRecorder.isPaused
-            Log.i("moved", moved.toString())
-
-            if (!notMoving) {
-                moved = true
-            }
+//            val notMoving = gestureDataRecorder.isPaused
+//            Log.i("moved", moved.toString())
+//
+//            if (!notMoving) {
+//                moved = true
+//            }
         }
 
         override fun onFinish() {
-            if (moved) {
-                val detection = gestureDetector.detect(gestureDataRecorder.data)
-                onGestureDetected(detection)
-            } else {
-                onGestureNotDetected()
-            }
+//            if (moved) {
+//                val detection = gestureDetector.detect(gestureDataRecorder.data)
+//                onGestureDetected(detection)
+//            } else {
+//                onGestureNotDetected()
+//            }
+
+            val detection = gestureDetector.detect(gestureDataRecorder.data)
+            onGestureDetected(detection)
 
             val effect = VibrationEffect.createOneShot(500, -1)
             vibrator.vibrate(effect)
