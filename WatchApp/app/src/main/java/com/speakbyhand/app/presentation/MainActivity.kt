@@ -13,6 +13,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -352,6 +353,7 @@ fun PerformingGesture(
     object : CountDownTimer(3000, 10) {
         override fun onTick(millisUntilFinished: Long) {
             val notMoving = gestureDataRecorder.isPaused
+            Log.i("moved", moved.toString())
 
             if (!notMoving) {
                 moved = true
