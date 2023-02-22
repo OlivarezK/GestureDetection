@@ -3,10 +3,10 @@ package com.speakbyhand.app.core;
 import android.util.Log;
 
 class PauseDetector {
-    final int pauseThreshold = 3;
+    final int pauseThreshold = 5;
     final float accelerationThreshold = 0.4f;
     final LimitedDeque<Boolean> stack = new LimitedDeque<>(50);
-    public int pauseCount = 0;
+    public int pauseCount = 5;
 
     public void update(float x, float y, float z){
         boolean accelerating = isAccelerating(x, y, z);
@@ -21,7 +21,7 @@ class PauseDetector {
 
     public void reset(){
         stack.clear();
-        pauseCount = 0;
+        pauseCount = 5;
     }
 
     public boolean isAccelerating(float x, float y,float z){
